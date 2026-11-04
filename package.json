@@ -1,0 +1,31 @@
+{
+  "name": "swarm-game-engine",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && vite build",
+    "test": "tsx --test tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "host:start": "tsx packages/host/server.ts",
+    "mod": "tsx packages/cli/main.ts",
+    "mcp": "tsx packages/mcp/main.ts",
+    "benchmark": "tsx tests/benchmark.ts"
+  },
+  "dependencies": {
+    "fflate": "0.8.3",
+    "pixi.js": "8.22.0"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1",
+    "@types/node": "24.10.0",
+    "prettier": "3.6.2",
+    "tsx": "4.20.6",
+    "typescript": "5.9.3",
+    "vite": "7.3.7"
+  }
+}

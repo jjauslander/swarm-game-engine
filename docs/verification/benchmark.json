@@ -1,0 +1,64 @@
+{
+  "node": "v24.20.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 5600X 6-Core Processor             ",
+  "results": [
+    {
+      "owners": {
+        "A": "p1",
+        "E": "p2"
+      },
+      "commandTypes": {
+        "end": 20,
+        "move": 80
+      },
+      "queryMs": {
+        "median": 1.2737000000000194,
+        "p95": 1.8770999999999844
+      },
+      "commandMs": {
+        "median": 1.1335000000000264,
+        "p95": 1.9436999999999784
+      },
+      "saveBytes": 23937,
+      "restoreMs": 119.39480000000003
+    },
+    {
+      "owners": {
+        "A": "p1",
+        "B": "p1",
+        "C": "p2",
+        "D": "p3",
+        "E": "p4",
+        "F": "p5"
+      },
+      "commandTypes": {
+        "end": 20,
+        "move": 80
+      },
+      "queryMs": {
+        "median": 1.9694999999999254,
+        "p95": 2.4943000000000666
+      },
+      "commandMs": {
+        "median": 2.1967999999999392,
+        "p95": 2.659999999999968
+      },
+      "saveBytes": 31996,
+      "restoreMs": 179.99249999999995
+    }
+  ],
+  "simulation": {
+    "decisions": 42,
+    "winner": "p1",
+    "elapsedMs": 168.62529999999992
+  },
+  "archiveBytes": 5828,
+  "memory": {
+    "rss": 98869248,
+    "heapTotal": 28598272,
+    "heapUsed": 18010488,
+    "external": 3405975,
+    "arrayBuffers": 788351
+  }
+}

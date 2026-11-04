@@ -2,7 +2,7 @@
 
 ## Status and authority
 
-The designer requested the initial engine implementation brief on 5 November 2026. The preparation of these documents is not itself implementation authorization. On a subsequent instruction to execute the brief, proceed through its full acceptance gates.
+The designer requested the initial engine implementation brief on 5 November 2026. The designer explicitly authorized execution on 5 November 2026: “Execute AGENTS.md and docs/Initial_Engine_Implementation_Brief.md through all acceptance gates. Use the original game as a read-only reference.” Implementation and actual verification are recorded in docs/Initial_Engine_Build_Report.md.
 
 Read [docs/Initial_Engine_Implementation_Brief.md](docs/Initial_Engine_Implementation_Brief.md) before planning or implementing. It is the primary scope and acceptance contract. Latest explicit designer instructions take precedence; record substantive changes.
 
