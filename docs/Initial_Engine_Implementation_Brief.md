@@ -52,7 +52,7 @@ Required:
 1. Headless engine with serializable state, deterministic execution, decisions, effects, outcomes and events.
 2. Hex topology and area ownership, distinct player/controller identities and a passive-by-default system participant.
 3. Versioned package validation, packing, importing, selection and dependency/version checking.
-4. One playable flat Swarm prototype package.
+4. One playable flat Swarm Basic Prototype package.
 5. A second package with an active system participant and temporary rule modification, requiring no engine-code edits.
 6. Local hotseat, local bot and fully automated games.
 7. An authoritative Node host and two separate browser clients, including reconnection during a pending choice.
@@ -82,7 +82,7 @@ Suggested layout (equivalent arrangements are acceptable):
 - packages/client: Pixi adapter, input, basic HUD, menus and audio.
 - packages/cli: command wrappers over modkit/host.
 - packages/mcp: MCP wrappers over the same services.
-- mods/swarm-prototype and mods/garden-cycle.
+- mods/swarm-basic-prototype and mods/garden-cycle.
 - tests/fixtures, tests/integration, tests/e2e.
 - docs: contracts, decisions, reference mapping, modding guide and build report.
 
@@ -164,9 +164,9 @@ Default prototype undo policy:
 
 Corrupt saves, oversized payloads and invalid dependency references fail before altering a live match. Preserve the current match until a replacement successfully loads.
 
-## 9. First package: Swarm prototype
+## 9. First package: Swarm Basic Prototype
 
-Deliver a clearly labelled “Swarm prototype — engine demonstration”, using the real 259-cell layout and earlier flat appearance. It is intentionally a rules subset with a prototype objective. Do not present it as the full accepted game.
+Deliver a clearly labelled “Swarm Basic Prototype”, using the real 259-cell layout and earlier flat appearance. It is intentionally a rules subset with a prototype objective. Do not present it as the full accepted game.
 
 Required playable subset:
 - Setup for two to six human/bot players, with freely allocated participating hives and at least one fixture where a player owns two separately scheduled hives.
@@ -179,7 +179,7 @@ Required playable subset:
 - Capacity handling for included units/resources must remain valid. If a support shortage can occur in this subset, implement its mandatory loss decision rather than letting invalid state persist.
 - Existing compulsory-choice ownership and independence of AP/support across same-player hives must hold.
 
-Prototype-only objective: first player to spend three donated pollen on allowed production at their controlled Queens wins. Count each pollen actually spent by that Queen's controller; a donation from another player's bee can contribute. Check victory only after the visit and free departure settle. Label this “Prototype production race”; this is a new demonstration objective, not a supersession of Swarm victory rules. A local bot must be able to complete a match; add a repeatable completion fixture and a bounded simulation with a reported result.
+Prototype-only objective: first player to spend three donated pollen on allowed production at their controlled Queens wins. Count each pollen actually spent by that Queen's controller; a donation from another player's bee can contribute. Check victory only after the visit and free departure settle. Display the package name as “Swarm Basic Prototype”. Describe this production-based objective in its rules/help; it is a new demonstration objective, not a supersession of Swarm victory rules. A local bot must be able to complete a match; add a repeatable completion fixture and a bounded simulation with a reported result.
 
 Excluded Swarm systems: attacks/theft/evasion, Swarm upgrades, walls, gestation, succession, conquest, collapse, voting and full M4 victory. Document them in a capability/parity matrix. Keep source behaviour for included rules; do not invent approximations to make tests pass.
 
@@ -348,7 +348,7 @@ Stage 1 — headless vertical slice:
 Create one small board, two participants plus passive system, a move that pauses for an opposing decision, deterministic continuation, save/replay and whole-action undo. Establish core tests before implementing extensive UI.
 
 Stage 2 — package and flat playable example:
-Load Swarm prototype from its package, implement included behaviours, basic HUD/input/audio, local human/bot play and a complete match. Deliver import/select/play early.
+Load Swarm Basic Prototype from its package, implement included behaviours, basic HUD/input/audio, local human/bot play and a complete match. Deliver import/select/play early.
 
 Stage 3 — authority/network:
 Use the same engine through two clients; prove seat binding, privacy, stale/duplicate handling and reconnect/checkpoint restore. Address design failures now.
