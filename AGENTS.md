@@ -12,7 +12,7 @@ The intended executing agent is Sol 6.1. No model-specific feature or account is
 
 This repository is a generic moddable hex-board engine with a bounded Swarm example and a second variant. The first example uses earlier flat Pixi/HTML graphics and basic sounds. Full Swarm parity, richer 3D, advanced bots and public hosting remain outside the initial milestone.
 
-The prototype-only production-race objective and reduced rules are specified in the brief; never present them as changes to the original game's accepted rules.
+The example package is named “Swarm Basic Prototype”. Its prototype-only production objective and reduced rules are specified in the brief; never present them as changes to the original game's accepted rules.
 
 ## Original game reference
 
