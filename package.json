@@ -22,7 +22,10 @@
     "prehost:start": "npm run identities",
     "premod": "npm run identities",
     "premcp": "npm run identities",
-    "prebenchmark": "npm run identities"
+    "prebenchmark": "npm run identities",
+    "start": "node scripts/play.mjs",
+    "play:stop": "node scripts/play.mjs --stop",
+    "test:launcher": "node --test tests/launcher.test.mjs"
   },
   "dependencies": {
     "fflate": "0.8.3",

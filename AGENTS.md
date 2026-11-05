@@ -1,10 +1,16 @@
 # Swarm game engine — agent guidance
 
+## Guided user experience
+
+For onboarding, playing, adapting or creating a game, follow docs/Guided_Game_Workshop.md. Start with Play / Adapt / Create only when the user has not already chosen. Handle setup and technical work; ask one useful creative question at a time. Use npm start -- --background for one-command install/build/serve. Cloud sessions require an actual accessible preview route; never pass remote localhost off as the user’s play link. Read historical briefs only when relevant to the change, not as a prerequisite to helping someone play.
+
+The designer requested this facilitated workflow after the engine build. Game-making assistance and simpler setup are now in scope; original Swarm remains read-only.
+
 ## Status and authority
 
 The designer requested the initial engine implementation brief on 5 November 2026. The designer explicitly authorized execution on 5 November 2026: “Execute AGENTS.md and docs/Initial_Engine_Implementation_Brief.md through all acceptance gates. Use the original game as a read-only reference.” Implementation and actual verification are recorded in docs/Initial_Engine_Build_Report.md.
 
-The initial build is recorded at commit 2c6d11c. It still contains Swarm-specific rules in the common runtime and is not yet a fully game-independent engine.
+The initial build is recorded at commit 2c6d11c. At that historical revision, Swarm-specific rules remained in the common runtime. The subsequent rule-separation milestone removed that limitation.
 
 The designer requested [docs/Game_Rule_Separation_Implementation_Brief.md](docs/Game_Rule_Separation_Implementation_Brief.md) on 5 November 2026. It defines the next milestone: trusted game modules, preservation of both Swarm examples, and an independent Outpost Capture game. The designer explicitly authorized execution on 5 November 2026: Execute AGENTS.md and docs/Game_Rule_Separation_Implementation_Brief.md through all acceptance gates. Keep the original Swarm repo read-only.
 

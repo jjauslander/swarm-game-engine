@@ -110,6 +110,18 @@ export const server = http.createServer(async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
   try {
     const url = new URL(req.url!, "http://localhost");
+    if (url.pathname === "/api/health" && req.method === "GET") {
+      res.end(
+        JSON.stringify({
+          service: "swarm-game-engine",
+          pid: process.pid,
+          instance: process.env.SWARM_PLAY_INSTANCE ?? null,
+          build: process.env.SWARM_BUILD_ID ?? null,
+        }),
+      );
+      return;
+    }
+
     if (!url.pathname.startsWith("/api/")) {
       const path = resolve("dist", "." + url.pathname);
       if (

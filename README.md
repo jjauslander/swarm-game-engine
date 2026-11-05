@@ -1,5 +1,21 @@
 # Swarm Game Engine
 
+Open this repository in Claude Code and say **“Help me get started.”**
+
+You get three choices:
+
+1. **Play the existing games** — Claude installs and starts them, then gives you the play link.
+2. **Adapt an existing game** — choose a game and talk through what you want to change.
+3. **Create your own game** — start with an idea, an existing rulebook, or ask Claude to help invent the rules. Build a small version, play it, and improve it together.
+
+You do not need to know the commands or write a complete specification. The guide asks one useful question at a time and handles the technical work. Repository instructions are in [CLAUDE.md](CLAUDE.md); the conversation begins when you send a message, not merely when Git finishes cloning.
+
+**Prefer to start it yourself?** With Node 22.12+ installed, run **npm start**. It installs dependencies, builds the games and starts one server. Stop a background launcher with **npm run play:stop**.
+
+**Using a cloud workspace?** Claude can do the coding and setup there. Interactive play also needs that workspace to provide a preview/forwarded link; its localhost address is not a link on your laptop. The guide checks this rather than claiming an unreachable server is playable.
+
+---
+
 A local-first hex-board runtime with trusted game modules, flat Pixi graphics, recoverable decisions, human/bot controllers and an optional Node authority.
 
 Three playable packages ship in the checkout:
@@ -12,15 +28,13 @@ Swarm rules live in their game module. A developer can supply different resource
 
 ## Run
 
-Requires Node 22.12+ (verified with 24.20.0), npm and Microsoft Edge for browser tests.
+Requires Node 22.12+ (verified with 24.20.0) and npm. Microsoft Edge is needed only to run the browser test suite, not to play.
 
 ~~~sh
-npm ci
-npm run build
-npm run host:start
+npm start
 ~~~
 
-Open http://127.0.0.1:5174. For development, run npm run dev in another terminal and open http://127.0.0.1:5173. Local browser play works without API access once the build is served. The original Swarm checkout is never required.
+Use the play URL printed by the launcher (normally http://127.0.0.1:5174). For development, run npm run dev in another terminal and open http://127.0.0.1:5173. Local browser play works without API access once the build is served. The original Swarm checkout is never required.
 
 Select a package, configure players/controllers, and Play locally. Swarm supports two to six players and separately scheduled hives; Outpost uses exactly two sides. Tap a piece/destination or use the accessible selectors. Staged movement controls appear only for games/actions that use them. Drag/zoom, focus and recenter operate on every board.
 
@@ -32,7 +46,7 @@ Save exports a pending-capable JSON save. Load from Mods with the exact matching
 
 Create network match and privately share one connection JSON per player. Join on another browser/device; retain the seat credential for reconnect. Disconnected seats wait. The authority persists under .runtime/host, including credentials separately from exported saves. Unavailable historical records are retained.
 
-Default binding is localhost. For a trusted LAN, set HOST=0.0.0.0 and open the machine's LAN address. Public hosting, accounts and matchmaking are deferred.
+Default binding is localhost. For a trusted LAN, start npm run host:start with HOST=0.0.0.0 and open the machine's LAN address. Public hosting, accounts and matchmaking are deferred.
 
 ## Create a game
 
@@ -57,6 +71,7 @@ npm test
 npm run build
 npm run test:e2e
 npm run benchmark
+npm run test:launcher
 ~~~
 
 [Rule-separation build report](docs/Game_Rule_Separation_Build_Report.md) · [Architecture](docs/Architecture.md) · [Package format](docs/Package_Format.md) · [Initial historical report](docs/Initial_Engine_Build_Report.md) · [Reference mapping](docs/Reference_Mapping.md) · [Asset provenance](docs/Asset_Provenance.md)
