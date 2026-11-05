@@ -16,8 +16,8 @@ import {
 } from "../games/outpost-capture/module.ts";
 import { load, digest, simulate, pack } from "../packages/modkit/index.ts";
 import { unpack } from "../packages/engine/package.ts";
-import { sourceDigest } from "../scripts/module-identities.ts";
-import { mkdirSync, writeFileSync } from "node:fs";
+import { sourceDigest, writeNormalized } from "../scripts/module-identities.ts";
+import { mkdirSync, writeFileSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { build } from "esbuild";
 const p = load("mods/outpost-capture/package.json") as OutpostPackage;
@@ -274,4 +274,14 @@ test("Outpost bundles and plays to completion without Swarm implementation in it
     winners: ["p1"],
     reason: "base-claimed",
   });
+});
+
+test("identity generator preserves an already matching CRLF checkout artifact", () => {
+  const file = ".runtime/identity-crlf-" + process.pid + ".ts";
+  const text = "export const n=1;\n";
+  writeFileSync(file, text.replaceAll("\n", "\r\n"));
+  writeNormalized(file, text);
+  assert.equal(readFileSync(file, "utf8"), text.replaceAll("\n", "\r\n"));
+  writeNormalized(file, "export const n=2;\n");
+  assert.equal(readFileSync(file, "utf8"), "export const n=2;\n");
 });

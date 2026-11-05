@@ -1,5 +1,5 @@
 import { identities } from "../packages/composition/identities.ts";
-import { readFileSync, writeFileSync, readdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync } from "node:fs";
 import { resolve, dirname, relative } from "node:path";
 import { createHash } from "node:crypto";
 /** Hash normalized trusted source graph, including transitive execution services.
@@ -33,6 +33,14 @@ export function sourceDigest(entry: string) {
       ),
     )
     .digest("hex");
+}
+/** Preserve an already-matching checkout's line endings and timestamps. */
+export function writeNormalized(path: string, text: string) {
+  if (
+    !existsSync(path) ||
+    readFileSync(path, "utf8").replaceAll("\r\n", "\n") !== text
+  )
+    writeFileSync(path, text);
 }
 export function verifySources() {
   const sources = JSON.parse(
@@ -75,13 +83,13 @@ if (
     if (readFileSync(file, "utf8").replaceAll("\r\n", "\n") !== text)
       throw Error("Stale module identities: run npm run identities");
   } else {
-    writeFileSync(file, text);
+    writeNormalized(file, text);
     for (const dir of readdirSync("mods")) {
       const path = "mods/" + dir + "/package.json";
       const p = JSON.parse(readFileSync(path, "utf8"));
       if (identities[p.module?.id]) {
         p.module = identities[p.module.id];
-        writeFileSync(path, JSON.stringify(p, null, 2) + "\n");
+        writeNormalized(path, JSON.stringify(p, null, 2) + "\n");
       }
     }
   }
