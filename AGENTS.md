@@ -14,7 +14,7 @@ The intended executing agent is Sol 6.1. No model-specific feature or account is
 
 ## Product boundary
 
-This repository currently provides a moddable hex-board prototype with a bounded Swarm example and a second variant. The planned rule-separation milestone establishes game-independent rules through trusted modules. The first example uses earlier flat Pixi/HTML graphics and basic sounds. Full Swarm parity, richer 3D, advanced bots and public hosting remain outside the initial milestone.
+This repository currently provides a moddable hex-board prototype with a bounded Swarm example and a second variant. The rule-separation milestone now implements trusted game modules and adds independent Outpost Capture plus a source starter; see docs/Game_Rule_Separation_Build_Report.md for passing implementation gates. Designer acceptance remains separate. The first example uses earlier flat Pixi/HTML graphics and basic sounds. Full Swarm parity, richer 3D, advanced bots and public hosting remain outside the initial milestone.
 
 The example package is named “Swarm Basic Prototype”. Its prototype-only production objective and reduced rules are specified in the brief; never present them as changes to the original game's accepted rules.
 

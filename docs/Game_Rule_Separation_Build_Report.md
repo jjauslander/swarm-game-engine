@@ -16,14 +16,14 @@ Novel mechanics require trusted source and an application rebuild. Data-only arc
 |---|---|
 | Initial npm test / npm run build | 33 tests passed; build passed |
 | npm ci | Passed; 39 packages installed, zero audit vulnerabilities |
-| Final npm test | 48 passed, zero failed/skipped; approximately 9.25 seconds |
+| Final npm test | 49 passed, zero failed/skipped in the final clean checkout; approximately 7.86 seconds |
 | npm run build | TypeScript and Vite passed |
 | npm run test:e2e -- --reporter=json | 15 passed; zero unexpected/skipped/flaky; approximately 28.2 seconds |
 | npm run benchmark | Both existing Swarm fixtures plus Outpost below 20 ms p95 |
 | Actual CLI and stdio MCP workflows | Create/edit/validate/simulate/pack/preview passed; each route's Outpost archive imported and played to victory in a browser |
 | Original repository Git status | Clean; no edits made |
 | Source scan for original checkout references in packages/games/scripts/templates | No matches |
-| Fresh checkout verification | Pending final handoff checkpoint; recorded below when run |
+| Fresh checkout verification | Passed at 4d570c4: npm ci --offline, build, all 49 tests; Git worktree unchanged |
 
 npm ci reported unapproved esbuild postinstall scripts in the local npm configuration; installed platform binaries worked and all build/bundle checks passed. No permission setting was changed.
 
@@ -67,7 +67,7 @@ The pre-fix hashes remain in verification/module-boundary-before-browser-fix.jso
 
 ## Performance
 
-Windows / AMD Ryzen 5 5600X / Node 24.20.0. Swarm fixtures each perform 100 accepted operations (80 moves, 20 ends). Outpost samples 100 operations over repeated complete games. Seed 12345.
+Windows / AMD Ryzen 5 5600X / Node 24.20.0 / Edge 156.0.4314.58. Swarm fixtures each perform 100 accepted operations (80 moves, 20 ends). Outpost samples 100 operations over repeated complete games. Seed 12345.
 
 | Fixture | Query median / p95 ms | Command median / p95 ms | Restore |
 |---|---|---|---|
@@ -89,6 +89,7 @@ Localhost acknowledgement sample: five accepted commands, median 19.74 ms and p9
 - The source starter's adjacent package.json caused Node to interpret TypeScript under the wrong module scope; its definition is game.json until copied into mods/.
 - Network browser testing exposed a genuine rapid-input/polling race, corrected as described above.
 - Screenshot review led to hiding unsupported staging controls and clearer base colours.
+- Clean-checkout testing found identity generation unnecessarily rewrote matching CRLF files. Generation now preserves matching bytes/timestamps; a focused regression and fresh checkout verify a clean Git status.
 
 ## Compatibility and remaining limits
 
@@ -97,3 +98,11 @@ Schema-1 packages/saves are not migrated; reopen them at 2c6d11c. Schema-2 pins 
 Source modules are trusted, finite developer code. The event budget cannot preempt infinite synchronous callbacks. Source changes require rebuilding/restarting, and novel modules must accompany their data archives. Private data/decisions/events are supported; general hidden-board gameplay remains deferred.
 
 Full Swarm, advanced bots, 3D, public hosting/accounts, designer appearance/audio/balance acceptance and physical-device acceptance remain outside this delivery.
+
+## Final standalone checkpoint and completion
+
+Implementation commits: bcdcaa1 (rule separation), 4d570c4 (idempotent Windows identity generation). A fresh Git clone of 4d570c4 ran npm ci --offline, npm run build and npm test successfully with a Node filesystem-read guard denying access to the original Swarm root. A direct reference-read probe confirmed the guard rejected access. All 49 tests passed and the clone's Git worktree stayed clean. Static runtime/source scans also found no reference-checkout paths.
+
+The final browser suite passed 15 tests before the generation-only correction; the subsequent build emitted identical browser asset names/content. That correction did not change runtime, modules or UI. The 15-test evidence remains applicable. Final screenshots were inspected at desktop and 390-pixel width.
+
+All mandatory implementation acceptance gates A–F have recorded passing evidence. Designer playtesting/appearance/audio/balance and physical-device acceptance remain separate. No original Swarm files were edited.

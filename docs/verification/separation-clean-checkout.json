@@ -1,0 +1,22 @@
+{
+  "commit": "4d570c4",
+  "node": "24.20.0",
+  "edge": "156.0.4314.58",
+  "commands": {
+    "npm ci --offline": "passed",
+    "npm run build": "passed",
+    "npm test": {
+      "passed": 49,
+      "failed": 0,
+      "skipped": 0
+    }
+  },
+  "referenceReadGuard": "probe rejected; inherited by Node child processes",
+  "gitStatus": "clean",
+  "browserSuite": {
+    "passed": 15,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "browserBundle": "unchanged by generation-only fix"
+}
