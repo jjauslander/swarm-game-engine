@@ -21,3 +21,7 @@ Explicit omissions: combat, theft/evasion, Swarms, Royal Jelly, walls, gestation
 Implementation reads current source for authoritative post-playtest behaviour; historical M2 build report descriptions may be superseded, particularly free Flower/Queen departure and cargo capacity. Current rule briefs/designer rulings retain precedence over source.
 
 Representation differences: immutable package topology replaces a global BOARD; opaque IDs replace coordinate IDs; stable numeric directions preserve jumps. The current packages use shared Garden but assign shared areas to an explicit system participant with scheduled events. It has no human seat or default victory condition.
+
+## Rule separation
+
+The preserved Swarm rules now live in games/swarm-basic. Outpost Capture and the Signal Relay starter are new demonstration rules, not changes to the original game. No new original-repository assets or rule changes were introduced in this milestone.

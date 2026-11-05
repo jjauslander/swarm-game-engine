@@ -1,61 +1,64 @@
 # Swarm Game Engine
 
-A local-first, moddable hex-board engine with flat Pixi graphics, human/bot controllers, recoverable decisions, and an optional Node authority.
+A local-first hex-board runtime with trusted game modules, flat Pixi graphics, recoverable decisions, human/bot controllers and an optional Node authority.
+
+Three playable packages ship in the checkout:
+
+- **Swarm Basic Prototype**: the bounded pollen/production example, using the 259-cell board.
+- **Garden Cycle**: its scheduled flooding variant.
+- **Outpost Capture**: a different 19-cell game with fuel, Scout deployment and explicit base-capture victory.
+
+Swarm rules live in their game module. A developer can supply different resources, actions, choices, turn rules and outcomes without changing the common runtime/client/host. New coded mechanics require a trusted module and rebuild; imported data archives cannot execute scripts.
 
 ## Run
 
-Requires Node 22.12+ (verified with Node 24.20.0), npm, and Microsoft Edge for browser tests.
+Requires Node 22.12+ (verified with 24.20.0), npm and Microsoft Edge for browser tests.
 
-```sh
+~~~sh
 npm ci
 npm run build
 npm run host:start
-```
+~~~
 
-Open http://127.0.0.1:5174. For development, run `npm run dev` in a second terminal and open http://127.0.0.1:5173. The production browser includes both examples and can play locally without API access once served. Network play requires the authority.
+Open http://127.0.0.1:5174. For development, run npm run dev in another terminal and open http://127.0.0.1:5173. Local browser play works without API access once the build is served. The original Swarm checkout is never required.
 
-Choose **Swarm Basic Prototype** or **Garden Cycle**, configure two to six players and assign hives, then Play locally. Each player needs at least one hive. A player can own multiple separately scheduled hives. Human/bot is selectable per player.
+Select a package, configure players/controllers, and Play locally. Swarm supports two to six players and separately scheduled hives; Outpost uses exactly two sides. Tap a piece/destination or use the accessible selectors. Staged movement controls appear only for games/actions that use them. Drag/zoom, focus and recenter operate on every board.
 
-Select a bee by tapping or the Select bee control. Choose highlighted destinations or a Movement route. Near Bumblebee taps stage a preview: Finish move or take the second segment; AP is charged once on completion. Queen visits pause for the Queen owner's production choice, then the visitor's free departure. Keyboard controls provide the same actions. Drag to pan, scroll to zoom; Focus hive and Recenter fit the board.
+Outpost: move for 1 AP/1 Fuel, deploy at your empty base for 2 AP/3 Fuel, and Claim while standing on the opposing base for 1 AP. Merely reaching the base does not win. Swarm's prototype objective remains spending three donated pollen on allowed production, with victory after compulsory departure; full Swarm rules remain outside this example.
 
-The prototype objective is to spend three pollen producing Workers/Honey at your Queens, with victory after the compulsory departure. Help lists omitted full-game rules. This is an engine demonstration, not a replacement for full Swarm.
-
-Save exports a new-engine JSON file, including a pending choice. Load from Mods while the matching package is selected. Undo reverses one complete local action; network/hidden-information undo is disabled. Saves contain no seat credentials.
-
-Sound enables/mutes short synthesized cues after a browser gesture. Volume is remembered. All route guidance is static and works with reduced motion. No 3D or external audio service is needed.
+Save exports a pending-capable JSON save. Load from Mods with the exact matching package/module build. Undo reverses a completed local action where permitted; network/private-package Undo is disabled. Sound/volume controls enable synthesized cues after a gesture.
 
 ## Network play
 
-Create network match and share one connection JSON per player. Join with that JSON on another browser context/device. Retain it privately: it is a seat credential. Reconnect last seat restores the saved connection. Disconnected seats wait; there is no automatic takeover. The authority persists under `.runtime/host`; keep that directory to resume after restart. Invalid development checkpoints are preserved separately.
+Create network match and privately share one connection JSON per player. Join on another browser/device; retain the seat credential for reconnect. Disconnected seats wait. The authority persists under .runtime/host, including credentials separately from exported saves. Unavailable historical records are retained.
 
-Default binding is localhost. For a trusted LAN, set `HOST=0.0.0.0` before starting the host and open its LAN address. The matching package and its digest are required on joining clients. Public hosting, accounts and matchmaking are outside this prototype.
+Default binding is localhost. For a trusted LAN, set HOST=0.0.0.0 and open the machine's LAN address. Public hosting, accounts and matchmaking are deferred.
 
-## Mod tools
+## Create a game
 
-```sh
-npm run mod -- list
-npm run mod -- create my-variant
-npm run mod -- validate .runtime/mods/my-variant/package.json
-npm run mod -- simulate .runtime/mods/my-variant/package.json 500
-npm run mod -- pack .runtime/mods/my-variant/package.json .runtime/my-variant.hexmod
-npm run mod -- preview .runtime/mods/my-variant/package.json
-```
+See [Build your own game](docs/Modding_Guide.md) for tested CLI/MCP data editing and the source-module starter, and [Module API](docs/Module_API.md) for custom rules.
 
-Import the resulting archive in Mods. The preview command can start a hidden local authority; its process ID is recorded in `.runtime/preview-process.json`. Stop that process when finished. Imported host packages live in host data; browser-local imports live in browser storage. Source packages remain unchanged.
+~~~sh
+npm run mod -- create my-outpost outpost-capture
+npm run mod -- validate .runtime/mods/my-outpost/package.json
+npm run mod -- simulate .runtime/mods/my-outpost/package.json 100
+npm run mod -- pack .runtime/mods/my-outpost/package.json .runtime/my-outpost.hexmod
+npm run mod -- preview .runtime/mods/my-outpost/package.json
+~~~
 
-For an agent, run `npm run mcp` as a local stdio MCP companion with the repository as its working directory. See [Modding guide](docs/Modding_Guide.md). CLI and MCP call shared services.
+The local MCP companion is launched directly with Node; configuration is in the guide. It edits scoped data packages, not executable source.
+
+Source/build identities are generated by npm run identities and checked at startup/build. Rule changes require rebuild/restart; development hot replacement is disabled. Schema-1 saves require historical commit 2c6d11c; no automatic migration is attempted.
 
 ## Verify
 
-```sh
+~~~sh
 npm test
 npm run build
 npm run test:e2e
 npm run benchmark
-```
+~~~
 
-See [build report](docs/Initial_Engine_Build_Report.md), [architecture](docs/Architecture.md), [package format](docs/Package_Format.md), [reference mapping](docs/Reference_Mapping.md) and [asset provenance](docs/Asset_Provenance.md). Original project access is not needed to install/build/run/test.
+[Rule-separation build report](docs/Game_Rule_Separation_Build_Report.md) · [Architecture](docs/Architecture.md) · [Package format](docs/Package_Format.md) · [Initial historical report](docs/Initial_Engine_Build_Report.md) · [Reference mapping](docs/Reference_Mapping.md) · [Asset provenance](docs/Asset_Provenance.md)
 
-## Planned rule separation
-
-The current runtime still contains Swarm-specific rules. The [Game-rule separation implementation brief](docs/Game_Rule_Separation_Implementation_Brief.md) defines the next step: move those rules into trusted game modules and prove the interface with Outpost Capture, a different game with fuel, deployment and base capture. The brief is ready for review; implementation has not yet been authorized.
+Designer playtesting, visual/audio approval and physical-device acceptance remain separate from automated acceptance checks.

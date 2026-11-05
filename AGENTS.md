@@ -6,7 +6,7 @@ The designer requested the initial engine implementation brief on 5 November 202
 
 The initial build is recorded at commit 2c6d11c. It still contains Swarm-specific rules in the common runtime and is not yet a fully game-independent engine.
 
-The designer requested [docs/Game_Rule_Separation_Implementation_Brief.md](docs/Game_Rule_Separation_Implementation_Brief.md) on 5 November 2026. It defines the next milestone: trusted game modules, preservation of both Swarm examples, and an independent Outpost Capture game. This brief is prepared for review; its implementation is not yet authorized. Do not infer build authorization from the request to write it.
+The designer requested [docs/Game_Rule_Separation_Implementation_Brief.md](docs/Game_Rule_Separation_Implementation_Brief.md) on 5 November 2026. It defines the next milestone: trusted game modules, preservation of both Swarm examples, and an independent Outpost Capture game. The designer explicitly authorized execution on 5 November 2026: Execute AGENTS.md and docs/Game_Rule_Separation_Implementation_Brief.md through all acceptance gates. Keep the original Swarm repo read-only.
 
 Read both briefs before planning. Once the designer authorizes the rule-separation brief, it is the scope and acceptance contract for that milestone and supersedes conflicting initial architecture assumptions. Preserve the initial brief's required Swarm behaviour and read-only reference boundary. Latest explicit designer instructions take precedence; record substantive changes. Record the new milestone's implementation and actual verification in docs/Game_Rule_Separation_Build_Report.md.
 

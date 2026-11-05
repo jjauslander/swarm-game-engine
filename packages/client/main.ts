@@ -1,3 +1,4 @@
+import { runtime, defaultPackageId } from "../composition/index.ts";
 import { localCatalog, identify, unpack } from "./local-catalog.ts";
 import { Application, Graphics, Text, Container } from "pixi.js";
 import {
@@ -10,7 +11,7 @@ import {
   copy,
   stable,
   tile,
-} from "../engine/index.ts";
+} from "../composition/index.ts";
 import { choose } from "./simple-bot.ts";
 import "./style.css";
 const el = (id: string) => document.getElementById(id)!;
@@ -31,8 +32,18 @@ let catalog: any[] = [],
   muted = localStorage.getItem("muted") !== "false",
   volume = Number(localStorage.getItem("volume") ?? 30),
   eventSeq = 0;
-const voices=new Set<OscillatorNode>();function silence(){for(const voice of voices){try{voice.stop()}catch{}}voices.clear()}let live: any = null;
-let boardResizeObserver:ResizeObserver|null=null;let cachedFrame: any = null;
+const voices = new Set<OscillatorNode>();
+function silence() {
+  for (const voice of voices) {
+    try {
+      voice.stop();
+    } catch {}
+  }
+  voices.clear();
+}
+let live: any = null;
+let boardResizeObserver: ResizeObserver | null = null;
+let cachedFrame: any = null;
 let app: Application | null = null,
   world: Container | null = null,
   zoom = 1,
@@ -69,7 +80,9 @@ async function api(path: string, body?: any) {
 }
 function sound(type: string) {
   if (muted || !audio || document.hidden) return;
-  const configuredCue=p?.presentation.sounds?.[type];if(!configuredCue)return;const o = audio.createOscillator(),
+  const configuredCue = p?.presentation.sounds?.[type];
+  if (!configuredCue) return;
+  const o = audio.createOscillator(),
     g = audio.createGain();
   o.type = "sine";
   const cue = p?.presentation.sounds?.[type];
@@ -82,7 +95,16 @@ function sound(type: string) {
   );
   o.connect(g);
   g.connect(audio.destination);
-  voices.add(o);while(voices.size>12){const oldest=voices.values().next().value!;try{oldest.stop()}catch{}voices.delete(oldest)}o.onended = () => {voices.delete(o);
+  voices.add(o);
+  while (voices.size > 12) {
+    const oldest = voices.values().next().value!;
+    try {
+      oldest.stop();
+    } catch {}
+    voices.delete(oldest);
+  }
+  o.onended = () => {
+    voices.delete(o);
     o.disconnect();
     g.disconnect();
   };
@@ -91,7 +113,8 @@ function sound(type: string) {
 }
 el("sound").onclick = async () => {
   muted = !muted;
-  localStorage.setItem("muted", String(muted));if(muted)silence();
+  localStorage.setItem("muted", String(muted));
+  if (muted) silence();
   try {
     audio ??= new AudioContext();
     await audio.resume();
@@ -100,7 +123,8 @@ el("sound").onclick = async () => {
 };
 (el("volume") as HTMLInputElement).oninput = (e) => {
   volume = Number((e.target as HTMLInputElement).value);
-  localStorage.setItem("volume", String(volume));if(!volume)silence();
+  localStorage.setItem("volume", String(volume));
+  if (!volume) silence();
 };
 el("pause").onclick = async () => {
   paused = !paused;
@@ -113,7 +137,9 @@ el("pause").onclick = async () => {
   }
   el("pause").textContent = paused ? "Resume bots" : "Pause bots";
 };
-function stop() {boardResizeObserver?.disconnect();boardResizeObserver=null;
+function stop() {
+  boardResizeObserver?.disconnect();
+  boardResizeObserver = null;
   clearInterval(poll);
   poll = null;
   stage = null;
@@ -122,7 +148,8 @@ function stop() {boardResizeObserver?.disconnect();boardResizeObserver=null;
   app = null;
   world = null;
   el("board").replaceChildren();
-  silence();void audio?.suspend();
+  silence();
+  void audio?.suspend();
 }
 el("home").onclick = () => {
   if (app)
@@ -148,7 +175,7 @@ async function init() {
   }
   selected = Math.max(
     0,
-    catalog.findIndex((x) => x.package.id === "swarm-basic-prototype"),
+    catalog.findIndex((x) => x.package.id === defaultPackageId),
   );
   const requested = new URLSearchParams(location.search).get("package");
   if (requested) {
@@ -205,10 +232,16 @@ function showMenu() {
   const config = () => {
     p = catalog[selected].package;
     el("help").textContent = p.help;
+    const descriptor = runtime.resolve(p).setup;
+    const countInput = el("count") as HTMLInputElement;
+    countInput.min = String(descriptor.minPlayers);
+    countInput.max = String(descriptor.maxPlayers);
     const count = Math.max(
-      2,
-      Math.min(6, Number((el("count") as HTMLInputElement).value)),
+      descriptor.minPlayers,
+      Math.min(descriptor.maxPlayers, Number(countInput.value)),
     );
+    countInput.value = String(count);
+    countInput.disabled = descriptor.minPlayers === descriptor.maxPlayers;
     el("players").innerHTML = Array.from(
       { length: count },
       (_, i) =>
@@ -224,11 +257,14 @@ function showMenu() {
       .filter((a) => !a.shared)
       .map(
         (a, i) =>
-          "<label>Hive " +
+          "<label>" +
+          descriptor.areaLabel +
+          " " +
           a.id +
           ' <select data-area="' +
           a.id +
-          '"><option value="">Unused</option>' +
+          '">' +
+          (descriptor.allowUnused ? '<option value="">Unused</option>' : "") +
           Array.from(
             { length: count },
             (_, j) =>
@@ -376,6 +412,7 @@ async function join(j: any) {
   selected = catalog.findIndex((x) => x.digest === j.digest);
   if (selected < 0) throw Error("Install matching package");
   p = catalog[selected].package;
+  runtime.resolve(p);
   currentView = await api("view", { id: matchId, digest: j.digest });
   eventSeq = currentView.events.at(-1)?.seq ?? 0;
   localStorage.setItem("networkSeat", JSON.stringify(j));
@@ -384,8 +421,16 @@ async function join(j: any) {
   poll = setInterval(async () => {
     if (busy) return;
     try {
-      currentView = await api("view", { id: matchId, digest: j.digest });
-      refresh();
+      const next = await api("view", { id: matchId, digest: j.digest });
+      if (
+        !busy &&
+        next.revision >= currentView.revision &&
+        (next.revision !== currentView.revision ||
+          next.botsPaused !== currentView.botsPaused)
+      ) {
+        currentView = next;
+        refresh();
+      }
     } catch (e) {
       error(e);
     }
@@ -393,7 +438,13 @@ async function join(j: any) {
 }
 async function command(c: any) {
   if (busy) return;
+  c = c.command ?? c;
   busy = true;
+  for (const control of el("controls").querySelectorAll<
+    HTMLButtonElement | HTMLSelectElement
+  >("button,select"))
+    control.disabled = true;
+  let failure: unknown = null;
   try {
     if (network) {
       await api("command", {
@@ -411,11 +462,12 @@ async function command(c: any) {
       });
     stage = null;
     selectedEntity = "";
-    refresh();
   } catch (e) {
-    error(e);
+    failure = e;
   } finally {
     busy = false;
+    refresh();
+    if (failure) error(failure);
   }
 }
 function refresh() {
@@ -428,46 +480,27 @@ function refresh() {
     el("pause").textContent = paused ? "Resume bots" : "Pause bots";
   }
   el("error").textContent = "";
-  el("status").textContent =
-    p.name +
-    " · " +
-    (v.winner
-      ? "Winner " + v.winner
-      : "Hive " + v.active + " · " + v.ap + " AP · Round " + v.round) +
-    (v.decision
-      ? " · " + v.decision.owner + " chooses " + v.decision.kind
-      : "");
-  el("status").textContent +=
-    " · Population " +
-    v.areas[v.active].population +
-    " / Supports " +
-    v.areas[v.active].support +
-    " · " +
-    Object.entries(v.score)
-      .map(([id, n]) => id + ": " + n)
-      .join(" | ");
+  el("status").textContent = p.name + " · " + v.status;
   for (const e of v.events)
     if (e.seq > eventSeq) {
       sound(e.type);
       eventSeq = e.seq;
     }
   el("controls").innerHTML =
-    '<button id="end">End activation</button><button id="undo">Undo</button><button id="finish">Finish move</button><button id="cancel">Cancel preview</button><button id="focus">Focus hive</button><button id="recenter">Recenter</button>' +
+    '<button id="end">End activation</button><button id="undo">Undo</button><button id="finish">Finish move</button><button id="cancel">Cancel preview</button><button id="focus">Focus area</button><button id="recenter">Recenter</button>' +
     (!network
       ? '<button id="save">Save</button>'
       : "<span>Network undo disabled</span>") +
     '<div id="choices"></div><details><summary>Game log / rules</summary><p id="rules"></p><div id="log"></div></details>';
-  (el("end") as HTMLButtonElement).disabled =
-    !v.actions.some((c) => c.type === "end" || c.type === "phase") || !!stage;
+  const primary = v.controls.find((c) => c.primary);
+  (el("end") as HTMLButtonElement).disabled = !primary || !!stage;
   (el("undo") as HTMLButtonElement).disabled = !v.canUndo;
-  el("end").textContent = v.actions.some((c) => c.type === "phase")
-    ? "Finish Pollen Runs"
-    : "End activation";
-  el("end").onclick = () =>
-    command({
-      type: v.actions.some((c) => c.type === "phase") ? "phase" : "end",
-    });
+  el("end").textContent = primary?.label ?? "End activation";
+  el("end").onclick = () => primary && command(primary);
+  el("focus").textContent = v.labels.focus;
   el("undo").onclick = () => command({ type: "undo" });
+  el("finish").hidden = el("cancel").hidden =
+    !stage && !v.controls.some((c) => c.staged);
   (el("finish") as HTMLButtonElement).disabled = !stage?.stop;
   el("finish").onclick = () => command(stage.stop);
   el("cancel").onclick = () => {
@@ -481,8 +514,9 @@ function refresh() {
     draw();
   };
   el("focus").onclick = () => {
-    const ts = p.tiles.filter((t) => t.area === v.active);
+    const ts = v.tiles.filter((t) => v.focusTiles.includes(t.id));
     const t = ts[Math.floor(ts.length / 2)];
+    if (!t) return;
     zoom = 1.6;
     pan = {
       x: (frame().x - Math.sqrt(3) * 28 * (t.q + t.r / 2)) * scale(),
@@ -496,7 +530,7 @@ function refresh() {
       a.href = URL.createObjectURL(
         new Blob([snapshot(p, state)], { type: "application/json" }),
       );
-      a.download = "swarm-save.json";
+      a.download = "game-save.json";
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 1000);
     };
@@ -507,12 +541,12 @@ function refresh() {
   if (!v.decision) {
     const actors = [
       ...new Set(
-        v.actions.filter((c) => c.type === "move").map((c) => c.actor),
+        v.controls.filter((c) => c.kind === "route").map((c) => c.actor),
       ),
     ];
     const picker = document.createElement("select");
-    picker.setAttribute("aria-label", "Select bee");
-    picker.add(new Option("Select bee", ""));
+    picker.setAttribute("aria-label", v.labels.select);
+    picker.add(new Option(v.labels.select, ""));
     actors.forEach((id: any) => picker.add(new Option(id, id)));
     picker.value = selectedEntity;
     picker.onchange = () => {
@@ -522,8 +556,8 @@ function refresh() {
     };
     el("choices").append(picker);
     if (selectedEntity) {
-      const legal = v.actions.filter(
-        (c) => c.type === "move" && c.actor === selectedEntity,
+      const legal = v.controls.filter(
+        (c) => c.kind === "route" && c.actor === selectedEntity,
       );
       const route = document.createElement("select");
       route.setAttribute("aria-label", "Movement route");
@@ -547,29 +581,26 @@ function refresh() {
       const b = document.createElement("button");
       b.textContent = "Confirm choice";
       b.onclick = () =>
-        command({
-          type: "respond",
-          decision: v.decision.id,
-          option: select.value,
-        });
+        command(v.decision.options.find((o) => o.id === select.value).command);
       el("choices").append(b);
     }
-  } else if (selectedEntity) {
-    const acts = v.actions.filter(
+  } else {
+    for (const c of v.controls.filter(
       (c) =>
-        (c.type === "pickup" || c.type === "drop") &&
-        c.actor === selectedEntity,
-    );
-    for (const c of acts) {
+        c.kind === "button" &&
+        !c.primary &&
+        (!c.actor || !selectedEntity || c.actor === selectedEntity),
+    )) {
       const b = document.createElement("button");
-      b.textContent = c.type + " " + (c.to ?? c.resource);
+      b.textContent = c.label;
       b.onclick = () => command(c);
       el("choices").append(b);
     }
   }
   draw();
 }
-async function board() {if(!muted)void audio?.resume();
+async function board() {
+  if (!muted) void audio?.resume();
   cachedFrame = null;
   el("menu").style.display = "none";
   el("board").style.display = "block";
@@ -581,7 +612,15 @@ async function board() {if(!muted)void audio?.resume();
     antialias: true,
   });
   app.canvas.setAttribute("aria-label", "Hex game board");
-  el("board").append(app.canvas);boardResizeObserver?.disconnect();boardResizeObserver=new ResizeObserver(()=>{if(app){app.renderer.resize(el("board").clientWidth,el("board").clientHeight);draw()}});boardResizeObserver.observe(el("board"));
+  el("board").append(app.canvas);
+  boardResizeObserver?.disconnect();
+  boardResizeObserver = new ResizeObserver(() => {
+    if (app) {
+      app.renderer.resize(el("board").clientWidth, el("board").clientHeight);
+      draw();
+    }
+  });
+  boardResizeObserver.observe(el("board"));
   world = new Container();
   app.stage.addChild(world);
   pan = { x: 0, y: 0 };
@@ -610,17 +649,11 @@ async function board() {if(!muted)void audio?.resume();
         y =
           (e.clientY - rect.top - app!.screen.height / 2 - pan.y) / scale() +
           frame().y;
-      const t = p.tiles
-        .filter(
-          (t) =>
-            p.areas.find((a) => a.id === t.area)?.shared ||
-            currentView.owners[t.area],
-        )
-        .sort(
-          (a, b) =>
-            Math.hypot(Math.sqrt(3) * 28 * (a.q + a.r / 2) - x, 42 * a.r - y) -
-            Math.hypot(Math.sqrt(3) * 28 * (b.q + b.r / 2) - x, 42 * b.r - y),
-        )[0];
+      const t = [...currentView.tiles].sort(
+        (a, b) =>
+          Math.hypot(Math.sqrt(3) * 28 * (a.q + a.r / 2) - x, 42 * a.r - y) -
+          Math.hypot(Math.sqrt(3) * 28 * (b.q + b.r / 2) - x, 42 * b.r - y),
+      )[0];
       if (t) tap(t.id);
     }
     drag = null;
@@ -634,12 +667,7 @@ async function board() {if(!muted)void audio?.resume();
 }
 function frame() {
   if (cachedFrame) return cachedFrame;
-  const ts =
-    p?.tiles.filter(
-      (t) =>
-        p.areas.find((a) => a.id === t.area)?.shared ||
-        currentView?.owners[t.area],
-    ) ?? [];
+  const ts = currentView?.tiles ?? [];
   const xs = ts.map((t) => Math.sqrt(3) * 28 * (t.q + t.r / 2)),
     ys = ts.map((t) => 42 * t.r);
   const minX = Math.min(...xs) - 40,
@@ -664,14 +692,9 @@ function tap(t: string) {
     paused = v.botsPaused;
     el("pause").textContent = paused ? "Resume bots" : "Pause bots";
   }
-  if (v.decision?.kind === "departure") {
-    const option = v.decision.options.find((o) => o.id === t);
-    if (option)
-      void command({
-        type: "respond",
-        decision: v.decision.id,
-        option: option.id,
-      });
+  if (v.decision) {
+    const option = v.decision.options.find((o) => o.target === t);
+    if (option) void command(option.command);
     return;
   }
   if (stage) {
@@ -681,19 +704,14 @@ function tap(t: string) {
       return;
     }
   }
-  const possible = v.actions.filter(
+  const possible = v.controls.filter(
     (c) =>
-      c.type === "move" && c.actor === selectedEntity && c.route.at(-1) === t,
+      c.kind === "route" && c.actor === selectedEntity && c.route.at(-1) === t,
   );
-  const near = v.actions.filter(
-    (c) => c.type === "move" && c.actor === selectedEntity && c.route[0] === t,
+  const near = v.controls.filter(
+    (c) => c.kind === "route" && c.actor === selectedEntity && c.route[0] === t,
   );
-  if (
-    selectedEntity &&
-    p.types[v.entities[selectedEntity].type].segments === 2 &&
-    near.length &&
-    !stage
-  ) {
+  if (selectedEntity && near.some((c) => c.staged) && near.length && !stage) {
     stage = {
       first: t,
       stop: near.find((c) => c.route.length === 1),
@@ -716,7 +734,8 @@ function tap(t: string) {
     return;
   }
   const e = Object.values(v.entities).find(
-    (e: any) => e.tile === t && !p.types[e.type].resource,
+    (e: any) =>
+      e.tile === t && !e.hidden && v.controls.some((c) => c.actor === e.id),
   ) as any;
   if (e) {
     if (stage) {
@@ -729,7 +748,7 @@ function tap(t: string) {
       } else
         error(
           Error(
-            "Complete the highlighted departure before selecting another bee",
+            "Complete the highlighted departure before selecting another piece",
           ),
         );
       return;
@@ -742,20 +761,14 @@ function tap(t: string) {
 function draw() {
   if (!app || !world || !currentView) return;
   app.canvas.dataset.cells = JSON.stringify(
-    p.tiles
-      .filter(
-        (t) =>
-          p.areas.find((a) => a.id === t.area)?.shared ||
-          currentView.owners[t.area],
-      )
-      .map((t) => ({
-        id: t.id,
-        x:
-          app!.screen.width / 2 +
-          pan.x +
-          (Math.sqrt(3) * 28 * (t.q + t.r / 2) - frame().x) * scale(),
-        y: app!.screen.height / 2 + pan.y + (42 * t.r - frame().y) * scale(),
-      })),
+    currentView.tiles.map((t) => ({
+      id: t.id,
+      x:
+        app!.screen.width / 2 +
+        pan.x +
+        (Math.sqrt(3) * 28 * (t.q + t.r / 2) - frame().x) * scale(),
+      y: app!.screen.height / 2 + pan.y + (42 * t.r - frame().y) * scale(),
+    })),
   );
   world.removeChildren().forEach((c) => c.destroy());
   world.position.set(
@@ -770,10 +783,8 @@ function draw() {
   }
   routes =
     stage?.continuations ??
-    v.actions.filter((c) => c.type === "move" && c.actor === selectedEntity);
-  for (const t of p.tiles) {
-    if (!p.areas.find((a) => a.id === t.area)?.shared && !v.owners[t.area])
-      continue;
+    v.controls.filter((c) => c.kind === "route" && c.actor === selectedEntity);
+  for (const t of v.tiles) {
     const x = Math.sqrt(3) * 28 * (t.q + t.r / 2),
       y = 42 * t.r,
       g = new Graphics();
@@ -783,17 +794,8 @@ function draw() {
     }).flat();
     const highlighted =
       routes.some((c) => c.route.at(-1) === t.id) ||
-      (v.decision?.kind === "departure" &&
-        v.decision.options.some((o) => o.id === t.id));
-    const col = v.effects.some((f) => f.tile === t.id)
-      ? p.presentation.floodColor
-      : t.terrain === "flower"
-        ? "#d6a14d"
-        : highlighted
-          ? "#779f72"
-          : t.area === "G"
-            ? "#36523a"
-            : "#614a32";
+      (v.decision && v.decision.options.some((o) => o.target === t.id));
+    const col = highlighted ? "#779f72" : (v.tileColors[t.id] ?? "#334455");
     g.poly(pts)
       .fill(col)
       .stroke({
@@ -819,11 +821,11 @@ function draw() {
     }
   }
   for (const e of Object.values(v.entities) as any[]) {
-    if (e.carrier) continue;
+    if (e.hidden) continue;
     const t = tile(p, stage && e.id === selectedEntity ? stage.first : e.tile),
       x = Math.sqrt(3) * 28 * (t.q + t.r / 2),
       y = 42 * t.r,
-      player = v.owners[e.origin],
+      player = e.owner,
       g = new Graphics();
     g.circle(x, y, 19)
       .fill("#17201c")
@@ -833,23 +835,19 @@ function draw() {
       });
     world.addChild(g);
     const text = new Text({
-      text: p.types[e.type].symbol,
+      text: e.symbol,
       style: { fontSize: 26, fill: "#f7d791" },
     });
     text.anchor.set(0.5);
     text.position.set(x, y);
     world.addChild(text);
-    let pollen = e.pollen;
-    if (stage && e.id === selectedEntity && t.terrain === "flower")
-      pollen = Math.max(
-        pollen,
-        p.types[e.type].cargo -
-          Object.values(v.entities).filter((r: any) => r.carrier === e.id)
-            .length,
-      );
-    if (pollen) {
+    const badgeValue =
+      stage && e.id === selectedEntity
+        ? ((stage.stop ?? stage.continuations[0])?.previewBadge ?? e.badge)
+        : e.badge;
+    if (badgeValue) {
       const badge = new Text({
-        text: String(pollen),
+        text: String(badgeValue),
         style: { fontSize: 13, fill: "#fff" },
       });
       badge.position.set(x + 10, y + 6);
@@ -865,11 +863,17 @@ setInterval(async () => {
     busy ||
     stage ||
     !state ||
-    state.core.winner ||
+    state.outcome ||
     !bots.has(decisionOwner(state))
   )
     return;
   const c = choose(p, state);
   if (c) await command(c);
 }, 250);
-document.addEventListener("visibilitychange",()=>{if(document.hidden){silence();void audio?.suspend()}else if(!muted&&app)void audio?.resume()});void init().catch(error);
+document.addEventListener("visibilitychange", () => {
+  if (document.hidden) {
+    silence();
+    void audio?.suspend();
+  } else if (!muted && app) void audio?.resume();
+});
+void init().catch(error);

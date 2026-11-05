@@ -1,3 +1,5 @@
+import { verifySources } from "../../scripts/module-identities.ts";
+verifySources();
 import { preview } from "../modkit/preview.ts";
 import { createInterface } from "node:readline";
 import { writeFileSync } from "node:fs";
@@ -40,15 +42,18 @@ const definitions = [
 async function call(name: string, a: any) {
   if (name === "capabilities")
     return {
-      schema: 1,
+      schema: 2,
       capabilities,
       guide:
-        "Create from template, read_mod, edit rules.floodEvery, write_mod, validate_mod, simulate_mod, pack_mod, import the archive through Mods. No engine edits required.",
+        "Data mods use installed trusted modules: create/read/write/validate/simulate/pack/preview. Outpost exposes fuel and round allowances; Swarm exposes production/flood settings. New mechanics require a trusted source module, explicit registration and rebuild; these tools do not install executable code.",
     };
   if (name === "list_packages")
     return catalog().map((p) => ({ id: p.id, name: p.name }));
   if (name === "create_mod") {
-    const p = catalog().find((p) => p.id === a.template) ?? catalog()[0];
+    const p = a.template
+      ? catalog().find((p) => p.id === a.template)
+      : catalog()[0];
+    if (!p) throw Error("Unknown template");
     return w.create(a.name, p);
   }
   if (name === "read_mod") return w.read(a.name);

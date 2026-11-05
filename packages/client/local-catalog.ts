@@ -1,7 +1,8 @@
+import outpost from "../../mods/outpost-capture/package.json";
 import basic from "../../mods/swarm-basic-prototype/package.json";
 import garden from "../../mods/garden-cycle/package.json";
-import { stable } from "../engine/index.ts";
-import { validate, unpack } from "../engine/package.ts";
+import { stable } from "../composition/index.ts";
+import { validate, unpack } from "../composition/index.ts";
 export { unpack, validate };
 export async function identify(p: any) {
   const bytes = new TextEncoder().encode(stable(p));
@@ -16,6 +17,8 @@ export async function identify(p: any) {
 export async function localCatalog() {
   const saved = JSON.parse(localStorage.getItem("installedPackages") ?? "[]");
   return Promise.all(
-    [basic, garden, ...saved.filter((p) => !validate(p).length)].map(identify),
+    [basic, garden, outpost, ...saved.filter((p) => !validate(p).length)].map(
+      identify,
+    ),
   );
 }

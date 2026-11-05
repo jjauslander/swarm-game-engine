@@ -1,0 +1,78 @@
+{
+  "node": "v24.20.0",
+  "platform": "win32",
+  "cpu": "AMD Ryzen 5 5600X 6-Core Processor             ",
+  "results": [
+    {
+      "owners": {
+        "A": "p1",
+        "E": "p2"
+      },
+      "commandTypes": {
+        "end": 20,
+        "move": 80
+      },
+      "queryMs": {
+        "median": 1.7177999999999543,
+        "p95": 2.5410000000000537
+      },
+      "commandMs": {
+        "median": 2.996399999999994,
+        "p95": 4.166000000000054
+      },
+      "saveBytes": 24320,
+      "restoreMs": 306.6482000000001
+    },
+    {
+      "owners": {
+        "A": "p1",
+        "B": "p1",
+        "C": "p2",
+        "D": "p3",
+        "E": "p4",
+        "F": "p5"
+      },
+      "commandTypes": {
+        "end": 20,
+        "move": 80
+      },
+      "queryMs": {
+        "median": 2.4086999999999534,
+        "p95": 2.7782999999999447
+      },
+      "commandMs": {
+        "median": 3.694400000000087,
+        "p95": 4.303899999999885
+      },
+      "saveBytes": 32379,
+      "restoreMs": 367.43420000000015
+    },
+    {
+      "game": "outpost-capture",
+      "operations": 100,
+      "queryMs": {
+        "median": 0.05669999999963693,
+        "p95": 0.06370000000015352
+      },
+      "commandMs": {
+        "median": 0.2784999999998945,
+        "p95": 0.3623999999999796
+      },
+      "restoreMs": 3.236199999999826,
+      "saveBytes": 6131
+    }
+  ],
+  "simulation": {
+    "decisions": 42,
+    "winner": "p1",
+    "elapsedMs": 462.4013000000002
+  },
+  "archiveBytes": 5926,
+  "memory": {
+    "rss": 119595008,
+    "heapTotal": 46821376,
+    "heapUsed": 24564032,
+    "external": 3406409,
+    "arrayBuffers": 788785
+  }
+}

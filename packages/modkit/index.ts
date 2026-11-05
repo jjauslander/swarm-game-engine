@@ -1,5 +1,5 @@
-import { validate, unpack } from "../engine/package.ts";
-export { validate, unpack, capabilities } from "../engine/package.ts";
+import { validate, unpack } from "../composition/index.ts";
+export { validate, unpack, capabilities } from "../composition/index.ts";
 import { createHash } from "node:crypto";
 import {
   readFileSync,
@@ -18,12 +18,12 @@ import {
   submit,
   decisionOwner,
   tile,
-} from "../engine/index.ts";
+} from "../composition/index.ts";
 import type { GamePackage, Match } from "../engine/types.ts";
 export function digest(p: GamePackage) {
   return createHash("sha256").update(stable(p)).digest("hex");
 }
-export function load(path: string): GamePackage {
+export function load(path: string) {
   const p = JSON.parse(readFileSync(path, "utf8"));
   const errors = validate(p);
   if (errors.length) throw Error(errors.join("\n"));
@@ -53,49 +53,8 @@ export function pack(p: GamePackage) {
   if (errors.length) throw Error(errors.join("\n"));
   return zipSync({ "package.json": strToU8(stable(p)) }, { level: 6 });
 }
-export function choose(p: GamePackage, s: Match) {
-  const who = decisionOwner(s),
-    all = actions(p, s, who);
-  if (!all.length) return null;
-  if (s.core.decision) {
-    const d = s.core.decision;
-    if (d.kind === "production")
-      return all.find((x) => x.option.startsWith("honey:")) ?? all[0];
-    return all[0];
-  }
-  const moves = all.filter((x) => x.type === "move");
-  const dist = (a: any, b: any) =>
-    Math.max(
-      Math.abs(a.q - b.q),
-      Math.abs(a.r - b.r),
-      Math.abs(a.q + a.r - b.q - b.r),
-    );
-  const scored = moves
-    .map((c) => {
-      const e = s.core.entities[c.actor],
-        targets = p.tiles.filter((t) =>
-          e.pollen
-            ? Object.values(s.core.entities).some(
-                (q) =>
-                  p.types[q.type].queen &&
-                  q.tile === t.id &&
-                  s.core.owners[q.origin] === who,
-              )
-            : t.terrain === "flower",
-        );
-      const distance = (t: string) =>
-        Math.min(...targets.map((x) => dist(tile(p, t), x)));
-      return {
-        c,
-        score:
-          distance(e.tile) - distance(c.route.at(-1)) + (e.pollen ? 0.01 : 0),
-      };
-    })
-    .sort(
-      (a, b) => b.score - a.score || stable(a.c).localeCompare(stable(b.c)),
-    );
-  return scored[0]?.score > 0 ? scored[0].c : all[0];
-}
+export { choose } from "../composition/index.ts";
+import { choose } from "../composition/index.ts";
 export function simulate(p: GamePackage, limit = 500, seed = 12345) {
   const areas = p.areas.filter((a) => !a.shared);
   let s = create(
@@ -104,7 +63,7 @@ export function simulate(p: GamePackage, limit = 500, seed = 12345) {
     { [areas[0].id]: "p1", [areas.at(-1)!.id]: "p2" },
     seed,
   );
-  for (let i = 0; i < limit && !s.core.winner; i++) {
+  for (let i = 0; i < limit && !s.outcome; i++) {
     const c = choose(p, s);
     if (!c) break;
     s = submit(p, s, decisionOwner(s), {
@@ -113,7 +72,12 @@ export function simulate(p: GamePackage, limit = 500, seed = 12345) {
       command: c,
     });
   }
-  return { decisions: s.revision, winner: s.core.winner, match: s };
+  return {
+    decisions: s.revision,
+    winner: s.outcome?.winners[0] ?? null,
+    outcome: s.outcome,
+    match: s,
+  };
 }
 export function catalog() {
   return readdirSync("mods", { withFileTypes: true })

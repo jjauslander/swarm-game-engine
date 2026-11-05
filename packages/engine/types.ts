@@ -1,3 +1,11 @@
+export type Json =
+  | null
+  | boolean
+  | number
+  | string
+  | Json[]
+  | { [key: string]: Json };
+export type Command = { type: string; [key: string]: Json };
 export interface Tile {
   id: string;
   area: string;
@@ -6,115 +14,142 @@ export interface Tile {
   terrain: string;
   edges: (string | null)[];
 }
-export interface Entity {
+export interface ModuleIdentity {
   id: string;
-  type: string;
-  origin: string;
-  tile: string;
-  pollen: number;
-  carrier: string | null;
+  version: string;
+  api: 1;
+  digest: string;
 }
 export interface GamePackage {
-  author: string;
-  description: string;
-  license: string;
-  schema: 1;
+  schema: 2;
   id: string;
   name: string;
   version: string;
   engine: string;
+  author: string;
+  description: string;
+  license: string;
+  module: ModuleIdentity;
   dependencies: { id: string; version: string; digest: string }[];
   capabilities: string[];
   tiles: Tile[];
   areas: { id: string; shared: boolean }[];
-  types: Record<
-    string,
-    {
-      label: string;
-      symbol: string;
-      cargo: number;
-      segments: number;
-      population: number;
-      queen?: boolean;
-      resource?: boolean;
-    }
-  >;
-  rules: {
-    ap: number;
-    support: number;
-    goal: number;
-    products: string[];
-    systemOperation?: string;
-    floodEvery: number;
-    floodDuration: number;
-    floodTiles: string[];
-  };
-  setup: Entity[];
   help: string;
   presentation: {
     background: string;
-    floodColor: string;
     sounds?: Record<string, { frequency: number; duration: number }>;
   };
   privateData?: Record<string, string>;
 }
+export interface Choice {
+  id: string;
+  label: string;
+  command: Command;
+  target?: string;
+}
 export interface Decision {
   id: string;
   owner: string;
-  kind: "production" | "departure" | "capacity";
-  actor: string;
-  queen?: string;
-  options: { id: string; label: string; command: any }[];
+  kind: string;
+  options: Choice[];
 }
-export interface Core {
-  participants: Record<string, { id: string; kind: "player" | "system" }>;
-  entities: Record<string, Entity>;
-  owners: Record<string, string>;
-  slots: string[];
-  index: number;
-  ap: number;
-  round: number;
-  clocks: Record<string, number>;
-  phase: "action" | "capacity" | "pollen";
-  eligible: string[];
-  score: Record<string, number>;
-  rng: number;
-  allocator: number;
-  effects: { tile: string; expires: number; source: string }[];
-  winner: string | null;
-  decision: Decision | null;
+export interface Outcome {
+  winners: string[];
+  reason: string;
 }
 export interface Event {
   seq: number;
   revision: number;
   transaction: number;
   type: string;
-  data: any;
+  data: Json;
   audience?: string;
 }
-export interface Match {
-  schema: 1;
+export type Controllers = Record<string, "human" | "bot" | "external">;
+export interface Checkpoint<S> {
+  core: S;
+  rng: number;
+  allocator: number;
+  turn: string;
+  decision: Decision | null;
+  outcome: Outcome | null;
+}
+export interface Match<S = unknown> extends Checkpoint<S> {
+  schema: 2;
   id: string;
   packageDigest: string;
+  module: ModuleIdentity;
   revision: number;
-  core: Core;
-  pending: Core | null;
-  undo: Core[];
+  pending: Checkpoint<S> | null;
+  undo: Checkpoint<S>[];
   events: Event[];
-  inputs: { actor: string; command: any }[];
+  inputs: { actor: string; command: Command }[];
   initial: {
     seed: number;
     owners: Record<string, string>;
-    controllers: Record<string, "human" | "bot" | "external">;
+    controllers: Controllers;
   };
   network: boolean;
-  controllers: Record<string, "human" | "bot" | "external">;
+  controllers: Controllers;
 }
-export interface Envelope {
-  matchId: string;
-  requestId: string;
+export interface Control {
+  command: Command;
+  label: string;
+  kind: "route" | "button";
+  actor?: string;
+  route?: string[];
+  staged?: boolean;
+  primary?: boolean;
+  previewBadge?: string;
+}
+export interface ViewEntity {
+  id: string;
+  tile: string;
+  symbol: string;
+  owner: string;
+  badge?: string;
+  hidden?: boolean;
+}
+export interface Observation {
+  id: string;
   revision: number;
-  command: any;
+  packageDigest: string;
+  turn: string;
+  outcome: Outcome | null;
+  status: string;
+  entities: Record<string, ViewEntity>;
+  tiles: Tile[];
+  tileColors: Record<string, string>;
+  focusTiles: string[];
+  controls: Control[];
+  actions: Command[];
+  decision: Decision | null;
+  canUndo: boolean;
+  events: Event[];
+  labels: { select: string; focus: string };
+}
+export interface SetupDescriptor {
+  minPlayers: number;
+  maxPlayers: number;
+  areaLabel: string;
+  allowUnused: boolean;
+}
+export interface GameModule<P extends GamePackage = GamePackage, S = object> {
+  identity: ModuleIdentity;
+  stateSchema: number;
+  setup: SetupDescriptor;
+  validatePackage(p: unknown): string[];
+  validateState(p: P, s: S): void;
+  initialize(p: P, draft: Match<S>, owners: Record<string, string>): void;
+  actions(p: P, s: Match<S>, who: string): Command[];
+  apply(p: P, draft: Match<S>, command: Command): void;
+  signals(
+    p: P,
+    s: Match<S>,
+  ): { turn: string; decision: Decision | null; outcome: Outcome | null };
+  observe(p: P, s: Match<S>, who: string): Observation;
+  policy?(p: P, observation: Observation): Command | null;
+  undoAllowed?(p: P, s: Match<S>, command: Command): boolean;
 }
 export const copy = <T>(v: T): T => structuredClone(v);
 export class RuleError extends Error {

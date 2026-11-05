@@ -1,3 +1,4 @@
+import { identities } from "../packages/composition/identities.ts";
 import { mkdirSync, writeFileSync } from "node:fs";
 const centres: any = {
     A: [-7, 3],
@@ -53,16 +54,17 @@ for (const a of "ABCDEF") {
     });
 }
 const p: any = {
-  schema: 1,
+  schema: 2,
+  module: identities["swarm-basic"],
   author: "Swarm contributors",
   description: "Flat playable engine demonstration",
   license: "Apache-2.0",
   id: "swarm-basic-prototype",
   name: "Swarm Basic Prototype",
   version: "0.1.0",
-  engine: "1",
+  engine: "2",
   dependencies: [],
-  capabilities: ["hex", "production", "decisions"],
+  capabilities: ["hex", "trusted-modules", "decisions"],
   tiles,
   areas: Object.keys(centres).map((id) => ({ id, shared: id === "G" })),
   types: {

@@ -91,3 +91,7 @@ Networking is local/LAN-oriented, polling-based and uses privately shared seat c
 Replay-based save validation grows with match history. Current fixture costs are reported rather than extrapolated to unlimited matches. Source-based scheduled extensions are trusted code and must obey the pure/finite-operation contract.
 
 Prototype implementation and the automated checks recorded here are ready for designer review; full Swarm and designer acceptance remain separate.
+
+## Later architecture correction
+
+The initial test results above remain historical evidence. They did not prove game independence: Swarm semantics were still built into common code. The subsequent [rule-separation milestone](Game_Rule_Separation_Build_Report.md) extracts them into trusted modules and adds independent-game and source-extension proofs.

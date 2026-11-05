@@ -1,3 +1,5 @@
+import { verifySources } from "../../scripts/module-identities.ts";
+verifySources();
 import http from "node:http";
 import { randomBytes } from "node:crypto";
 import {
@@ -25,7 +27,7 @@ import {
   restore,
   decisionOwner,
   copy,
-} from "../engine/index.ts";
+} from "../composition/index.ts";
 import type { GamePackage, Match } from "../engine/types.ts";
 const root = process.env.SWARM_HOST_DATA ?? ".runtime/host";
 mkdirSync(root, { recursive: true });
@@ -52,6 +54,7 @@ const matches = new Map<
   }
 >();
 const token = () => randomBytes(24).toString("hex");
+const unavailable = new Map<string, unknown>();
 if (existsSync(root + "/matches.json"))
   for (const [k, v] of JSON.parse(
     readFileSync(root + "/matches.json", "utf8"),
@@ -67,23 +70,23 @@ if (existsSync(root + "/matches.json"))
           paused: v.paused ?? false,
         });
       } catch {
-        writeFileSync(
-          root + "/rejected-checkpoint.json",
-          readFileSync(root + "/matches.json"),
-        );
-        console.error(
-          "Skipped incompatible development checkpoint " +
-            k +
-            "; original retained in rejected-checkpoint.json",
-        );
+        unavailable.set(k, v);
+        console.error("Checkpoint unavailable: " + k + "; retained unchanged");
       }
+    } else {
+      unavailable.set(k, v);
+      console.error(
+        "Checkpoint package unavailable: " + k + "; retained unchanged",
+      );
     }
   }
+
 function persist() {
   writeFileSync(
     root + "/matches.tmp",
-    JSON.stringify(
-      [...matches].map(([k, v]) => [
+    JSON.stringify([
+      ...unavailable,
+      ...[...matches].map(([k, v]) => [
         k,
         {
           digest: digest(v.p),
@@ -93,7 +96,7 @@ function persist() {
           paused: v.paused ?? false,
         },
       ]),
-    ),
+    ]),
   );
   renameSync(root + "/matches.tmp", root + "/matches.json");
 }
@@ -232,7 +235,7 @@ export const server = http.createServer(async (req, res) => {
 const botTimer = setInterval(() => {
   for (const m of matches.values()) {
     const who = decisionOwner(m.s);
-    if (m.paused || m.s.controllers[who] !== "bot" || m.s.core.winner) continue;
+    if (m.paused || m.s.controllers[who] !== "bot" || m.s.outcome) continue;
     try {
       const c = choose(m.p, m.s);
       if (c) {

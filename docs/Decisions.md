@@ -15,3 +15,15 @@
 - Development checkpoints from pre-schema edits are quarantined rather than silently migrated.
 - Initial dependency audit identified archive-parser/development-server advisories. Updated to fflate 0.8.3 and Vite 7.3.7; audit then reported zero vulnerabilities.
 - Static routes and finite simple sounds preserve accessibility without an animation subsystem.
+
+## Game-rule separation — 5 November 2026
+
+- Designer explicitly authorized the rule-separation brief. Earlier claims of generality were too broad: the initial core still contained Swarm semantics. Preserve that historical report and document this correction.
+- Use a small typed trusted-module interface with module-owned validated state and declarative observations. Do not introduce an unlimited DSL.
+- Runtime owns transactions, revisions, RNG/IDs, history and envelope identity. Modules own legality, resources, phases, continuation semantics, outcomes and policy.
+- Explicit composition and instance registries replace global default flood registration. A second runtime can omit the Swarm module entirely.
+- Source-artifact SHA-256 identity covers the transitive local TypeScript graph and common runtime. Generated constants are excluded to avoid circular hashing. Startup/build checks enforce matching source; this is not a downloaded-code signature or security sandbox.
+- Schema 2 intentionally rejects schema-1 saves; reopen historical files at 2c6d11c. Preserve unavailable authority records on later persistence.
+- Generic route/button affordances preserve Swarm staging and support Outpost without client rule branches. Browser testing found a pre-existing rapid-input/polling race; controls now wait for submission and stale/redundant polls do not overwrite interactions.
+- The independent Signal Relay source starter proves a new action/resource/opposing choice/outcome through the same interface. Initial proof hashes were recorded before adding it. Later browser fixes and semantically verified formatting are documented separately.
+- Outpost uses original procedural symbols and basic sounds, direct Scout ownership, fuel and participant turns. It is deliberately small; no franchise assets, combat, advanced AI or 3D were added.

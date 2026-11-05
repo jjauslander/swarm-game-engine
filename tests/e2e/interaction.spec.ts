@@ -128,7 +128,18 @@ test("six hive flat rendering frame samples and ten-cycle resource evidence", as
       heap: (performance as any).memory?.usedJSHeapSize,
     };
   });
-  const box=await page.locator("canvas").boundingBox();await page.mouse.move(box!.x+box!.width/2,box!.y+box!.height/2);await page.mouse.down();await page.mouse.move(box!.x+box!.width/2+50,box!.y+box!.height/2+35,{steps:30});await page.mouse.up();const frames=await framePromise;await page.getByRole("button",{name:"Recenter",exact:true}).click();await info.attach("frame-times", {
+  const box = await page.locator("canvas").boundingBox();
+  await page.mouse.move(box!.x + box!.width / 2, box!.y + box!.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(
+    box!.x + box!.width / 2 + 50,
+    box!.y + box!.height / 2 + 35,
+    { steps: 30 },
+  );
+  await page.mouse.up();
+  const frames = await framePromise;
+  await page.getByRole("button", { name: "Recenter", exact: true }).click();
+  await info.attach("frame-times", {
     body: JSON.stringify(frames),
     contentType: "application/json",
   });
@@ -136,4 +147,34 @@ test("six hive flat rendering frame samples and ten-cycle resource evidence", as
   expect(await page.locator("canvas").count()).toBe(1);
 });
 
-test('sound enables on gesture, mute and Undo avoid historical cues',async({page})=>{await page.addInitScript(()=>{(window as any).cueStarts=0;const original=AudioContext.prototype.createOscillator;AudioContext.prototype.createOscillator=function(){const node=original.call(this);const start=node.start.bind(node);node.start=(...args:any[])=>{(window as any).cueStarts++;return start(...args)};return node}});await page.goto('/');await page.getByRole('button',{name:'Sound',exact:true}).click();await page.locator('#controller1').selectOption('human');await page.getByRole('button',{name:'Play locally',exact:true}).click();await page.getByLabel('Select bee').selectOption('Aw');await page.getByRole('button',{name:'Move selected route'}).click();const sounds=await page.evaluate(()=>(window as any).cueStarts);expect(sounds).toBeGreaterThan(0);await page.getByRole('button',{name:'Undo',exact:true}).click();expect(await page.evaluate(()=>(window as any).cueStarts)).toBe(sounds);await page.getByRole('button',{name:'Mute sound',exact:true}).click();await page.getByLabel('Select bee').selectOption('Aw');await page.getByRole('button',{name:'Move selected route'}).click();expect(await page.evaluate(()=>(window as any).cueStarts)).toBe(sounds)});
+test("sound enables on gesture, mute and Undo avoid historical cues", async ({
+  page,
+}) => {
+  await page.addInitScript(() => {
+    (window as any).cueStarts = 0;
+    const original = AudioContext.prototype.createOscillator;
+    AudioContext.prototype.createOscillator = function () {
+      const node = original.call(this);
+      const start = node.start.bind(node);
+      node.start = (...args: any[]) => {
+        (window as any).cueStarts++;
+        return start(...args);
+      };
+      return node;
+    };
+  });
+  await page.goto("/");
+  await page.getByRole("button", { name: "Sound", exact: true }).click();
+  await page.locator("#controller1").selectOption("human");
+  await page.getByRole("button", { name: "Play locally", exact: true }).click();
+  await page.getByLabel("Select bee").selectOption("Aw");
+  await page.getByRole("button", { name: "Move selected route" }).click();
+  const sounds = await page.evaluate(() => (window as any).cueStarts);
+  expect(sounds).toBeGreaterThan(0);
+  await page.getByRole("button", { name: "Undo", exact: true }).click();
+  expect(await page.evaluate(() => (window as any).cueStarts)).toBe(sounds);
+  await page.getByRole("button", { name: "Mute sound", exact: true }).click();
+  await page.getByLabel("Select bee").selectOption("Aw");
+  await page.getByRole("button", { name: "Move selected route" }).click();
+  expect(await page.evaluate(() => (window as any).cueStarts)).toBe(sounds);
+});

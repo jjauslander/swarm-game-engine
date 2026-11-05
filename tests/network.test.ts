@@ -3,12 +3,17 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { load, pack, digest } from "../packages/modkit/index.ts";
-import { tile } from "../packages/engine/index.ts";
+import { tile } from "./swarm-runtime.ts";
 test("authority rejects forged/stale/duplicate commands and restores opposing pending decision after restart", async () => {
   const url = "http://127.0.0.1:5198/api/";
   let child: any;
   const data = ".runtime/network-test-" + process.pid + "-" + Date.now();
-  const privatePackage=load("mods/swarm-basic-prototype/package.json");privatePackage.id="private-fixture";privatePackage.privateData={p1:"private-one",p2:"private-two"};mkdirSync(data+"/packages",{recursive:true});writeFileSync(data+"/packages/private.hexmod",pack(privatePackage));const launch = async () => {
+  const privatePackage = load("mods/swarm-basic-prototype/package.json");
+  privatePackage.id = "private-fixture";
+  privatePackage.privateData = { p1: "private-one", p2: "private-two" };
+  mkdirSync(data + "/packages", { recursive: true });
+  writeFileSync(data + "/packages/private.hexmod", pack(privatePackage));
+  const launch = async () => {
     child = spawn(
       process.execPath,
       ["--import", "tsx", "packages/host/server.ts"],
@@ -43,7 +48,27 @@ test("authority rejects forged/stale/duplicate commands and restores opposing pe
     return { ok: r.ok, data };
   };
   try {
-    await launch();const privateMatch=await req("create",{digest:digest(privatePackage),owners:{A:"p1",E:"p2"},seed:7});assert(privateMatch.ok);const privateToken=privateMatch.data.seats.find(x=>x.player==="p1").token;const observation=JSON.stringify((await req("view",{id:privateMatch.data.id},privateToken)).data);assert(observation.includes("private-one"));assert(!observation.includes("private-two"));assert(!observation.includes("rng"));const catalogView=JSON.stringify(await (await fetch(url+"packages")).json());assert(!catalogView.includes("private-one"));assert(!catalogView.includes("private-two"));
+    await launch();
+    const privateMatch = await req("create", {
+      digest: digest(privatePackage),
+      owners: { A: "p1", E: "p2" },
+      seed: 7,
+    });
+    assert(privateMatch.ok);
+    const privateToken = privateMatch.data.seats.find(
+      (x) => x.player === "p1",
+    ).token;
+    const observation = JSON.stringify(
+      (await req("view", { id: privateMatch.data.id }, privateToken)).data,
+    );
+    assert(observation.includes("private-one"));
+    assert(!observation.includes("private-two"));
+    assert(!observation.includes("rng"));
+    const catalogView = JSON.stringify(
+      await (await fetch(url + "packages")).json(),
+    );
+    assert(!catalogView.includes("private-one"));
+    assert(!catalogView.includes("private-two"));
     const p = load("mods/swarm-basic-prototype/package.json");
     p.id = "pending-fixture";
     p.name = "Pending fixture";
@@ -182,6 +207,39 @@ test("authority rejects forged/stale/duplicate commands and restores opposing pe
       outcome = (await req("view", { id: bots.data.id }, botSeat)).data.winner;
     }
     assert.equal(outcome, "p1");
+    const outpost = load("mods/outpost-capture/package.json");
+    const oc = await req("create", {
+      digest: digest(outpost),
+      owners: { A: "p1", B: "p2" },
+      seed: 44,
+    });
+    assert(oc.ok);
+    const ot = oc.data.seats.find((x) => x.player === "p1").token;
+    const ov = (await req("view", { id: oc.data.id }, ot)).data;
+    assert(
+      !(await req("view", { id: oc.data.id, digest: "f".repeat(64) }, ot)).ok,
+    );
+    const outpostMove = ov.actions.find((x) => x.type === "move");
+    assert(
+      (
+        await req(
+          "command",
+          {
+            id: oc.data.id,
+            requestId: "outpost-move",
+            revision: 0,
+            command: outpostMove,
+          },
+          ot,
+        )
+      ).ok,
+    );
+    child.kill();
+    await new Promise<void>((resolve) => child.once("exit", () => resolve()));
+    await launch();
+    const resumed = (await req("view", { id: oc.data.id }, ot)).data;
+    assert.equal(resumed.revision, 1);
+    assert.equal(resumed.entities.scoutA.tile, outpostMove.route[0]);
   } finally {
     timings.sort((a, b) => a - b);
     mkdirSync(".runtime", { recursive: true });

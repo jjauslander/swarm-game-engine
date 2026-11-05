@@ -1,3 +1,5 @@
+import { verifySources } from "../../scripts/module-identities.ts";
+verifySources();
 import { preview } from "../modkit/preview.ts";
 import { writeFileSync } from "node:fs";
 import {
@@ -16,7 +18,19 @@ try {
       JSON.stringify(catalog().map((p) => ({ id: p.id, name: p.name }))),
     );
   else if (op === "create")
-    console.log(JSON.stringify(w.create(name, catalog()[0])));
+    console.log(
+      JSON.stringify(
+        w.create(
+          name,
+          arg
+            ? (catalog().find((p) => p.id === arg) ??
+                (() => {
+                  throw Error("Unknown template");
+                })())
+            : catalog()[0],
+        ),
+      ),
+    );
   else if (op === "validate") console.log(JSON.stringify(validate(load(name))));
   else if (op === "simulate")
     console.log(

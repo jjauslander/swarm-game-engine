@@ -14,7 +14,15 @@
     "host:start": "tsx packages/host/server.ts",
     "mod": "tsx packages/cli/main.ts",
     "mcp": "tsx packages/mcp/main.ts",
-    "benchmark": "tsx tests/benchmark.ts"
+    "benchmark": "tsx tests/benchmark.ts",
+    "identities": "tsx scripts/module-identities.ts",
+    "prebuild": "npm run identities",
+    "pretest": "npm run identities",
+    "predev": "npm run identities",
+    "prehost:start": "npm run identities",
+    "premod": "npm run identities",
+    "premcp": "npm run identities",
+    "prebenchmark": "npm run identities"
   },
   "dependencies": {
     "fflate": "0.8.3",
@@ -23,6 +31,7 @@
   "devDependencies": {
     "@playwright/test": "1.56.1",
     "@types/node": "24.10.0",
+    "esbuild": "0.28.2",
     "prettier": "3.6.2",
     "tsx": "4.20.6",
     "typescript": "5.9.3",

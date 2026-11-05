@@ -23,7 +23,7 @@ import {
   support,
   population,
   view,
-} from "../packages/engine/index.ts";
+} from "./swarm-runtime.ts";
 import { zipSync, strToU8 } from "fflate";
 const base = load("mods/swarm-basic-prototype/package.json");
 const start = (

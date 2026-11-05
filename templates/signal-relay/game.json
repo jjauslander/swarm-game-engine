@@ -1,0 +1,348 @@
+{
+  "schema": 2,
+  "id": "signal-relay",
+  "name": "Signal Relay Starter",
+  "version": "1.0.0",
+  "engine": "2",
+  "author": "Swarm contributors",
+  "description": "Source-module starter with a cross-player signal choice.",
+  "license": "Apache-2.0",
+  "module": {
+    "id": "signal-relay",
+    "api": 1,
+    "version": "1.0.0",
+    "digest": "0000000000000000000000000000000000000000000000000000000000000000"
+  },
+  "dependencies": [],
+  "capabilities": [
+    "hex",
+    "decisions",
+    "trusted-modules"
+  ],
+  "tiles": [
+    {
+      "id": "cell0",
+      "area": "A",
+      "q": -2,
+      "r": 0,
+      "terrain": "space",
+      "edges": [
+        "cell4",
+        "cell1",
+        null,
+        null,
+        null,
+        "cell3"
+      ]
+    },
+    {
+      "id": "cell1",
+      "area": "space",
+      "q": -2,
+      "r": 1,
+      "terrain": "space",
+      "edges": [
+        "cell5",
+        "cell2",
+        null,
+        null,
+        "cell0",
+        "cell4"
+      ]
+    },
+    {
+      "id": "cell2",
+      "area": "space",
+      "q": -2,
+      "r": 2,
+      "terrain": "space",
+      "edges": [
+        "cell6",
+        null,
+        null,
+        null,
+        "cell1",
+        "cell5"
+      ]
+    },
+    {
+      "id": "cell3",
+      "area": "space",
+      "q": -1,
+      "r": -1,
+      "terrain": "space",
+      "edges": [
+        "cell8",
+        "cell4",
+        "cell0",
+        null,
+        null,
+        "cell7"
+      ]
+    },
+    {
+      "id": "cell4",
+      "area": "space",
+      "q": -1,
+      "r": 0,
+      "terrain": "space",
+      "edges": [
+        "cell9",
+        "cell5",
+        "cell1",
+        "cell0",
+        "cell3",
+        "cell8"
+      ]
+    },
+    {
+      "id": "cell5",
+      "area": "space",
+      "q": -1,
+      "r": 1,
+      "terrain": "space",
+      "edges": [
+        "cell10",
+        "cell6",
+        "cell2",
+        "cell1",
+        "cell4",
+        "cell9"
+      ]
+    },
+    {
+      "id": "cell6",
+      "area": "space",
+      "q": -1,
+      "r": 2,
+      "terrain": "space",
+      "edges": [
+        "cell11",
+        null,
+        null,
+        "cell2",
+        "cell5",
+        "cell10"
+      ]
+    },
+    {
+      "id": "cell7",
+      "area": "space",
+      "q": 0,
+      "r": -2,
+      "terrain": "space",
+      "edges": [
+        "cell12",
+        "cell8",
+        "cell3",
+        null,
+        null,
+        null
+      ]
+    },
+    {
+      "id": "cell8",
+      "area": "space",
+      "q": 0,
+      "r": -1,
+      "terrain": "space",
+      "edges": [
+        "cell13",
+        "cell9",
+        "cell4",
+        "cell3",
+        "cell7",
+        "cell12"
+      ]
+    },
+    {
+      "id": "cell9",
+      "area": "space",
+      "q": 0,
+      "r": 0,
+      "terrain": "space",
+      "edges": [
+        "cell14",
+        "cell10",
+        "cell5",
+        "cell4",
+        "cell8",
+        "cell13"
+      ]
+    },
+    {
+      "id": "cell10",
+      "area": "space",
+      "q": 0,
+      "r": 1,
+      "terrain": "space",
+      "edges": [
+        "cell15",
+        "cell11",
+        "cell6",
+        "cell5",
+        "cell9",
+        "cell14"
+      ]
+    },
+    {
+      "id": "cell11",
+      "area": "space",
+      "q": 0,
+      "r": 2,
+      "terrain": "space",
+      "edges": [
+        null,
+        null,
+        null,
+        "cell6",
+        "cell10",
+        "cell15"
+      ]
+    },
+    {
+      "id": "cell12",
+      "area": "space",
+      "q": 1,
+      "r": -2,
+      "terrain": "space",
+      "edges": [
+        "cell16",
+        "cell13",
+        "cell8",
+        "cell7",
+        null,
+        null
+      ]
+    },
+    {
+      "id": "cell13",
+      "area": "space",
+      "q": 1,
+      "r": -1,
+      "terrain": "space",
+      "edges": [
+        "cell17",
+        "cell14",
+        "cell9",
+        "cell8",
+        "cell12",
+        "cell16"
+      ]
+    },
+    {
+      "id": "cell14",
+      "area": "space",
+      "q": 1,
+      "r": 0,
+      "terrain": "space",
+      "edges": [
+        "cell18",
+        "cell15",
+        "cell10",
+        "cell9",
+        "cell13",
+        "cell17"
+      ]
+    },
+    {
+      "id": "cell15",
+      "area": "space",
+      "q": 1,
+      "r": 1,
+      "terrain": "space",
+      "edges": [
+        null,
+        null,
+        "cell11",
+        "cell10",
+        "cell14",
+        "cell18"
+      ]
+    },
+    {
+      "id": "cell16",
+      "area": "space",
+      "q": 2,
+      "r": -2,
+      "terrain": "space",
+      "edges": [
+        null,
+        "cell17",
+        "cell13",
+        "cell12",
+        null,
+        null
+      ]
+    },
+    {
+      "id": "cell17",
+      "area": "space",
+      "q": 2,
+      "r": -1,
+      "terrain": "space",
+      "edges": [
+        null,
+        "cell18",
+        "cell14",
+        "cell13",
+        "cell16",
+        null
+      ]
+    },
+    {
+      "id": "cell18",
+      "area": "B",
+      "q": 2,
+      "r": 0,
+      "terrain": "space",
+      "edges": [
+        null,
+        null,
+        "cell15",
+        "cell14",
+        "cell17",
+        null
+      ]
+    }
+  ],
+  "areas": [
+    {
+      "id": "A",
+      "shared": false
+    },
+    {
+      "id": "B",
+      "shared": false
+    },
+    {
+      "id": "space",
+      "shared": true
+    }
+  ],
+  "help": "Transmit a signal; the other player accepts or reflects it. Receive enough charge to win.",
+  "presentation": {
+    "background": "#101c2c",
+    "sounds": {
+      "entity.moved": {
+        "frequency": 260,
+        "duration": 0.1
+      },
+      "entity.deployed": {
+        "frequency": 380,
+        "duration": 0.15
+      },
+      "activation.started": {
+        "frequency": 180,
+        "duration": 0.1
+      },
+      "outcome.declared": {
+        "frequency": 600,
+        "duration": 0.3
+      }
+    }
+  },
+  "rules": {
+    "target": 2
+  }
+}

@@ -11,3 +11,7 @@ The new client uses original procedural hex drawing, simple system-font Queen/be
 Engine code retains repository Apache 2.0 licensing. No licensing conclusion about the original project's artwork, branding or recordings is inferred from that license. No such external asset files are included. New procedural presentation code follows this repository's license; system glyph appearance depends on the device font.
 
 Designer appearance/listening review remains separate. This delivers the requested flatter baseline, not exact pixel reproduction of a historical screenshot.
+
+## Outpost Capture
+
+Original procedural hex colours and a plain triangle Scout symbol; short configured sine-wave cues use the existing synthesizer. No franchise artwork, recordings, external generated assets or new original-Swarm assets were copied.

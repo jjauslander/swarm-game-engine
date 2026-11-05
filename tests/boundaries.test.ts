@@ -17,8 +17,10 @@ import {
   view,
   restore,
   snapshot,
-} from "../packages/engine/index.ts";
-import { registerScheduledOperation } from "../packages/engine/extensions.ts";
+} from "./swarm-runtime.ts";
+import { createOperations } from "../games/swarm-basic/extensions.ts";
+import { createSwarmModule } from "../games/swarm-basic/module.ts";
+import { Runtime } from "../packages/engine/index.ts";
 const p = load("mods/swarm-basic-prototype/package.json");
 const go = (p: any, s: any, c: any) =>
   submit(p, s, decisionOwner(s), {
@@ -67,17 +69,31 @@ test("shortage offers only initial pollen carriers before capacity removal", () 
   assert.equal(s.core.decision?.kind, "capacity");
 });
 test("trusted failing or over-budget effects leave source state untouched", () => {
-  registerScheduledOperation("test-failure", ({ emit }) => {
+  const ops = createOperations();
+  const isolated = new Runtime().register(createSwarmModule(ops));
+  ops.register("test-failure", ({ emit }) => {
     for (let i = 0; i < 300; i++) emit("test.event", {});
   });
   const q = copy(p);
   q.rules.floodEvery = 1;
   q.rules.systemOperation = "test-failure";
-  assert.deepEqual(validate(q), []);
-  let s = create(q, digest(q), { A: "p1", E: "p2" });
-  s = go(q, s, { type: "end" });
+  assert.deepEqual(isolated.validate(q), []);
+  let s = isolated.create(q, digest(q), { A: "p1", E: "p2" });
+  s = isolated.submit(q, s, "p1", {
+    matchId: s.id,
+    revision: s.revision,
+    command: { type: "end" },
+  });
   const before = hash(s);
-  assert.throws(() => go(q, s, { type: "end" }), /limit/);
+  assert.throws(
+    () =>
+      isolated.submit(q, s, "p2", {
+        matchId: s.id,
+        revision: s.revision,
+        command: { type: "end" },
+      }),
+    /limit/,
+  );
   assert.equal(hash(s), before);
 });
 test("private events and options are omitted for other seats", () => {
@@ -121,4 +137,21 @@ test("pickup/drop consumes AP and support moves with carrier", () => {
   assert.deepEqual(s.core, start);
 });
 
-test('capacity casualty releases carried pot onto its vacated cell',()=>{let s=create(p,digest(p),{A:'p1',E:'p2'});const source=p.tiles.find(t=>t.area==='G'&&t.terrain!=='flower')!.id;s.core.entities.Ew.tile=source;s.core.entities.Eh.carrier='Ew';s.core.entities.Eh.tile=source;s=go(p,s,{type:'end'});assert.equal(s.core.decision?.kind,'capacity');s=go(p,s,{type:'respond',decision:s.core.decision!.id,option:'Ew'});assert.equal(s.core.entities.Eh.carrier,null);assert.equal(s.core.entities.Eh.tile,source)});
+test("capacity casualty releases carried pot onto its vacated cell", () => {
+  let s = create(p, digest(p), { A: "p1", E: "p2" });
+  const source = p.tiles.find(
+    (t) => t.area === "G" && t.terrain !== "flower",
+  )!.id;
+  s.core.entities.Ew.tile = source;
+  s.core.entities.Eh.carrier = "Ew";
+  s.core.entities.Eh.tile = source;
+  s = go(p, s, { type: "end" });
+  assert.equal(s.core.decision?.kind, "capacity");
+  s = go(p, s, {
+    type: "respond",
+    decision: s.core.decision!.id,
+    option: "Ew",
+  });
+  assert.equal(s.core.entities.Eh.carrier, null);
+  assert.equal(s.core.entities.Eh.tile, source);
+});

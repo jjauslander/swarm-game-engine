@@ -1,0 +1,10 @@
+{
+  "swarm-basic": {
+    "entry": "games/swarm-basic/module.ts",
+    "version": "1.0.0"
+  },
+  "outpost-capture": {
+    "entry": "games/outpost-capture/module.ts",
+    "version": "1.0.0"
+  }
+}

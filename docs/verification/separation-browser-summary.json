@@ -1,0 +1,87 @@
+{
+  "stats": {
+    "startTime": "2026-11-05T01:04:57.419Z",
+    "duration": 28192.892,
+    "expected": 15,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  },
+  "tests": [
+    {
+      "title": "production choice, pending save restore and completion at 1280",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "production choice, pending save restore and completion at 390",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "canvas taps stage Bumblebee preview without AP then commit one AP; Undo restores",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "browser local mode works with all API traffic blocked",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "six hive flat rendering frame samples and ten-cycle resource evidence",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "sound enables on gesture, mute and Undo avoid historical cues",
+      "file": "interaction.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "Outpost deploy, undo, save and complete independent rules at 1280",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "Outpost deploy, undo, save and complete independent rules at 390",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "Outpost round-limit draw is displayed",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "Outpost two browser seats reconnect and complete a full match",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "cli authored Outpost archive imports and plays to victory",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "mcp authored Outpost archive imports and plays to victory",
+      "file": "outpost.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "local flat board, two-segment movement, save and menus on desktop",
+      "file": "play.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "phone viewport fits controls and switches packages ten times",
+      "file": "play.spec.ts",
+      "passed": true
+    },
+    {
+      "title": "two network seats enforce revision/authority and reconnect",
+      "file": "play.spec.ts",
+      "passed": true
+    }
+  ]
+}

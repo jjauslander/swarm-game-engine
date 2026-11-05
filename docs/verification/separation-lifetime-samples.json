@@ -1,0 +1,92 @@
+[
+  {
+    "documents": 1,
+    "nodes": 451,
+    "jsEventListeners": 33,
+    "usedSize": 6233112,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1347784,
+    "backingStorageSize": 3120552
+  },
+  {
+    "documents": 1,
+    "nodes": 306,
+    "jsEventListeners": 33,
+    "usedSize": 6402816,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1151464,
+    "backingStorageSize": 3120881
+  },
+  {
+    "documents": 1,
+    "nodes": 451,
+    "jsEventListeners": 33,
+    "usedSize": 6588864,
+    "totalSize": 7262208,
+    "embedderHeapUsedSize": 1129144,
+    "backingStorageSize": 3120909
+  },
+  {
+    "documents": 1,
+    "nodes": 306,
+    "jsEventListeners": 33,
+    "usedSize": 6636108,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1160184,
+    "backingStorageSize": 3120875
+  },
+  {
+    "documents": 1,
+    "nodes": 451,
+    "jsEventListeners": 33,
+    "usedSize": 6749756,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1130552,
+    "backingStorageSize": 3120913
+  },
+  {
+    "documents": 1,
+    "nodes": 306,
+    "jsEventListeners": 33,
+    "usedSize": 6729648,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1163096,
+    "backingStorageSize": 3120879
+  },
+  {
+    "documents": 1,
+    "nodes": 451,
+    "jsEventListeners": 33,
+    "usedSize": 6808312,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1176912,
+    "backingStorageSize": 3120917
+  },
+  {
+    "documents": 1,
+    "nodes": 306,
+    "jsEventListeners": 33,
+    "usedSize": 6802952,
+    "totalSize": 7524352,
+    "embedderHeapUsedSize": 1113192,
+    "backingStorageSize": 3120883
+  },
+  {
+    "documents": 1,
+    "nodes": 451,
+    "jsEventListeners": 33,
+    "usedSize": 7160920,
+    "totalSize": 8310784,
+    "embedderHeapUsedSize": 1248816,
+    "backingStorageSize": 3120921
+  },
+  {
+    "documents": 1,
+    "nodes": 306,
+    "jsEventListeners": 33,
+    "usedSize": 7150812,
+    "totalSize": 8310784,
+    "embedderHeapUsedSize": 1121936,
+    "backingStorageSize": 3120887
+  }
+]

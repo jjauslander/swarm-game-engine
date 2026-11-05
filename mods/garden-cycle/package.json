@@ -1,16 +1,15 @@
 {
-  "schema": 1,
+  "schema": 2,
   "author": "Swarm contributors",
   "description": "Flat playable engine demonstration",
   "license": "Apache-2.0",
   "id": "garden-cycle",
   "name": "Garden Cycle",
   "version": "0.1.0",
-  "engine": "1",
+  "engine": "2",
   "dependencies": [],
   "capabilities": [
     "hex",
-    "production",
     "decisions"
   ],
   "tiles": [
@@ -4201,5 +4200,11 @@
         "duration": 0.2
       }
     }
+  },
+  "module": {
+    "id": "swarm-basic",
+    "api": 1,
+    "version": "1.0.0",
+    "digest": "c352a1ee433107dd18d3a0418d63bc70112e6d95960e5df41cd9648694477ce3"
   }
 }

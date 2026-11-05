@@ -1,23 +1,21 @@
 # Architecture
 
-The pure TypeScript simulation is in packages/engine. It imports no browser, filesystem, network, time or ambient random APIs. GamePackage is immutable configuration; Match owns serializable authority state. Entities have distinct type, origin area, physical location and optional carrier. Area owners determine participant control. Controller selection belongs to clients/adapters.
+The pure runtime in packages/engine processes validated commands, checkpoints complete actions, manages deterministic RNG/IDs, filters events and decisions, and validates save replay. It imports no games or platform APIs. Match metadata wraps opaque module-validated core state.
 
-An activation schedules an area, not simply a player. Core slots, independent clocks and AP permit several hives owned by one participant. Decisions explicitly identify their deciding participant, independent of the active area.
+The [module contract](Module_API.md) puts configuration, setup constraints, actions, decisions, phases, resources, observations, outcomes and optional bot policy in trusted modules. Swarm Basic Prototype/Garden Cycle use games/swarm-basic; Outpost Capture uses games/outpost-capture. Neither family is mandatory for a Runtime instance.
 
-Flow: authenticated seat → revision-checked command → exact legal-action validation → copied authoritative state → deterministic consequences → pending decision or completed transaction → projected view/events. Invalid commands leave input state untouched. Full transactions keep a pre-action snapshot; production, cargo and departure join the originating move. A completed action becomes one undo entry. Network undo and private-package undo are rejected by the engine.
+packages/composition/index.ts registers modules; module-sources.json declares trusted source entries. packages/client/local-catalog.ts lists offline data packages. These are allowed integration edits for a new game; common host/client/modkit code does not branch on game IDs.
 
-Pollen Runs is offered before capacity losses on a shortage when eligible initial carriers exist; finishing it triggers capacity checks. Capacity decisions remove support-counted individuals until legal. Pots follow physical territory, even when carried by another area's bee. Each activation refills eligible Flower campers.
+Flow: authenticated seat → revision/exact legality checks → isolated draft → rule consequences → validated state/signals → pending cross-player decision or settled action/outcome. Undo restores completed action state, RNG and allocator. Network/private-package Undo is forbidden; modules can forbid reversal.
 
-IDs use a serialized monotonic allocator. Gameplay random choices use serialized xorshift state. Stable serialization sorts object keys. Package digests use SHA-256; the lightweight state hash is a replay diagnostic, not an authentication mechanism. Replay starts from package/seed/owners and reapplies accepted actor+command pairs. Restore compares the complete reconstructed state before accepting a save.
+Queries isolate current state without copying full history. Pixi/HTML receives declarative board/entity/status/action descriptors. It handles buttons, routes, staged previews, camera, accessible selectors and synth cues without knowing pollen or fuel. Bots receive permitted observations and public definitions.
 
-Semantic events carry sequence, revision, transaction and optional audience. Projections omit history, RNG, allocator and other participants' privateData; decision options are only supplied to their owner. The Node host binds credentials to participants and filters views before serialization.
+The Node authority uses JSON HTTP, revisioned polling, random seat credentials, idempotent requests and persisted checkpoints. Unavailable package/checkpoint records are retained when new matches are persisted. Reconnect resumes the same seat and choice. Public hosting/accounts remain out of scope.
 
-The initial private-information capability is participant-private package data and private decision options/events. Arbitrary hidden board entities and fog-of-war rules are not implemented. They require a later observation extension; the generic client never needs full internal match state for network play.
+CLI/MCP wrap shared modkit operations. ZIP data invokes installed modules; archives never register or execute scripts. Novel trusted source needs explicit registration and rebuild. Digests cover transitive local TypeScript and common runtime. Direct Node startup verifies generated identity. Vite disables HMR and rejects stale source.
 
-Host transport is JSON HTTP with revisioned polling, not lockstep or WebSocket synchronization. The host serializes command handling, caches request IDs and persists matches plus seat credentials separately from player saves. Reconnect authenticates the same seat and returns its current decision. Package import is declarative and uses the same validator as CLI/MCP/browser.
+Save schema 2 pins package/module identity. Restore replays inputs and compares canonical full state, including pending continuations. Schema-1 files get an actionable rejection and remain preserved. Replay cost grows with history.
 
-Local browser mode calls the same engine and offers hotseat/bot controls. Its trusted local runtime naturally contains the full local simulation; network clients receive filtered views. Local play is not a secrecy boundary against the operator of the device.
+Local play needs no API/cloud after serving the build. Local hotseat is not a secrecy boundary against the device operator. Network clients receive filtered observations. Existing private-data/decision/event checks remain; arbitrary hidden-board mechanics are deferred.
 
-Flat renderer/input/HUD are in packages/client. Pixi draws projected tiles and package-defined symbols; HTML provides accessible choices. Camera/audio/preferences remain outside match state. There is one root bot timer; each board destroys its Pixi app/listeners on exit. Static route guidance honors reduced motion by construction.
-
-The shared modkit handles filesystem adapters, SHA-256, packages, deterministic bots and workspace confinement. CLI and stdio MCP are thin wrappers. Preview launches a separate local host when necessary. The supported scheduled-operation registration API is source-only; archives cannot register executable code.
+Trusted callbacks must terminate and remain pure. The 256-event budget catches excessive emission but cannot interrupt infinite synchronous code; the extension API is not an untrusted-code sandbox.

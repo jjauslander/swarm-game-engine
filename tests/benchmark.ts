@@ -9,7 +9,7 @@ import {
   decisionOwner,
   snapshot,
   restore,
-} from "../packages/engine/index.ts";
+} from "./swarm-runtime.ts";
 const p = load("mods/swarm-basic-prototype/package.json"),
   results: any[] = [];
 for (const owners of [
@@ -58,6 +58,45 @@ for (const owners of [
 }
 let t = performance.now();
 const result = simulate(p, 500);
+const mainSimulationMs = performance.now() - t;
+const outpost = load("mods/outpost-capture/package.json");
+const { runtime } = await import("../packages/composition/index.ts");
+let os = runtime.create(outpost, digest(outpost), { A: "p1", B: "p2" }),
+  queries: number[] = [],
+  commands: number[] = [];
+for (let i = 0; i < 100; i++) {
+  if (os.outcome)
+    os = runtime.create(outpost, digest(outpost), { A: "p1", B: "p2" });
+  let begin = performance.now();
+  runtime.actions(outpost, os, decisionOwner(os));
+  queries.push(performance.now() - begin);
+  const command = runtime.choose(outpost, os)!;
+  begin = performance.now();
+  os = runtime.submit(outpost, os, decisionOwner(os), {
+    matchId: os.id,
+    revision: os.revision,
+    command,
+  });
+  commands.push(performance.now() - begin);
+}
+const stats = (a: number[]) => {
+  a.sort((a, b) => a - b);
+  return { median: a[50], p95: a[95] };
+};
+const saved = runtime.snapshot(outpost, os);
+t = performance.now();
+runtime.restore(outpost, digest(outpost), saved);
+results.push({
+  game: outpost.id,
+  operations: 100,
+  queryMs: stats(queries),
+  commandMs: stats(commands),
+  restoreMs: performance.now() - t,
+  saveBytes: Buffer.byteLength(saved),
+});
+for (const result of results)
+  if (result.queryMs.p95 >= 20 || result.commandMs.p95 >= 20)
+    throw Error("20ms p95 acceptance target failed");
 const report = {
   node: process.version,
   platform: platform(),
@@ -66,7 +105,7 @@ const report = {
   simulation: {
     decisions: result.decisions,
     winner: result.winner,
-    elapsedMs: performance.now() - t,
+    elapsedMs: mainSimulationMs,
   },
   archiveBytes: pack(p).length,
   memory: process.memoryUsage(),

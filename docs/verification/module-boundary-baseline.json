@@ -1,0 +1,12 @@
+{
+  "packages/client/main.ts": "0fd6072379aacd966374f94cd2fa6a183fc9cb06846aaf5b71c4f1aabbff97f6",
+  "packages/client/simple-bot.ts": "4e2aad5a53a45dd4313db916af222789a451c00b4e4bf57445e048434fcf0712",
+  "packages/engine/index.ts": "8eb8a4c2e5a41e811c60884004a0fb6ff1bcec290b1016b36d086aff8972ad10",
+  "packages/engine/package.ts": "fd41da44176e97169274ac277be5bb2717fcc2326ad1cfe60554b48c986996b4",
+  "packages/engine/services.ts": "be3bd1f0323b079aa9e899ab3a2591686746739bf791bfcba623115a11a6d7af",
+  "packages/engine/types.ts": "b1a605499eb651ecfc71d1bd5bc4dd28ffe34bb3091df6a38c338a67b685818a",
+  "packages/engine/validation.ts": "d80ae7157a18d39a775bcde0a1fe88e4801ad81d4811598f0d31b448195dcea2",
+  "packages/host/server.ts": "54009818cb6e5dde592309b32388d6c38906773a3ffcde6e466ff1f310ec832d",
+  "packages/modkit/index.ts": "21a96ee137eac8268270639fd077845975dbe59ef6d9c5d43eeabc5dc6e6943b",
+  "packages/modkit/preview.ts": "402bf1593c6500c1335d6ad8f12810a46eb3e316d35b5901c583fad5dba5576d"
+}

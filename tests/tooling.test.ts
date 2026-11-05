@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { mkdirSync, rmSync, readFileSync } from "node:fs";
 import {
   Workspace,
@@ -94,7 +94,7 @@ test("real MCP stdio creates edits validates simulates and packs variant", async
     );
     const packed = await tool("pack_mod", { name: "test-variant" });
     assert.equal(
-      unpack(Buffer.from(packed.archive, "base64")).rules.floodEvery,
+      (unpack(Buffer.from(packed.archive, "base64")) as any).rules.floodEvery,
       2,
     );
     const preview = await tool("preview_mod", { name: "test-variant" });
@@ -106,6 +106,58 @@ test("real MCP stdio creates edits validates simulates and packs variant", async
       await fetch("http://127.0.0.1:5174/api/packages")
     ).json();
     assert(installed.some((x) => x.package.id === "test-variant"));
+    await tool("create_mod", {
+      name: "outpost-variant",
+      template: "outpost-capture",
+    });
+    const outpost = await tool("read_mod", { name: "outpost-variant" });
+    outpost.rules.income = 3;
+    await tool("write_mod", { name: "outpost-variant", package: outpost });
+    assert.deepEqual(
+      (await tool("validate_mod", { name: "outpost-variant" })).errors,
+      [],
+    );
+    assert(
+      (await tool("simulate_mod", { name: "outpost-variant", limit: 100 }))
+        .outcome,
+    );
+    const archive = await tool("pack_mod", { name: "outpost-variant" });
+    assert.equal(
+      (unpack(Buffer.from(archive.archive, "base64")) as any).rules.income,
+      3,
+    );
+    const previewOutpost = await tool("preview_mod", {
+      name: "outpost-variant",
+    });
+    assert((await fetch(previewOutpost.url)).ok);
+    const cliName = "outpost-cli-" + process.pid;
+    const cli = (args: string[]) => {
+      const result = spawnSync(
+        process.execPath,
+        ["--import", "tsx", "packages/cli/main.ts", ...args],
+        { encoding: "utf8", windowsHide: true },
+      );
+      assert.equal(result.status, 0, result.stderr);
+      return result.stdout;
+    };
+    cli(["create", cliName, "outpost-capture"]);
+    const cliPath = ".runtime/mods/" + cliName + "/package.json";
+    const cliDefinition = JSON.parse(readFileSync(cliPath, "utf8"));
+    cliDefinition.rules.income = 3;
+    (await import("node:fs")).writeFileSync(
+      cliPath,
+      JSON.stringify(cliDefinition),
+    );
+    assert.deepEqual(JSON.parse(cli(["validate", cliPath])), []);
+    assert(JSON.parse(cli(["simulate", cliPath, "100"])).outcome);
+    cli(["pack", cliPath, ".runtime/" + cliName + ".hexmod"]);
+    assert.equal(
+      (unpack(readFileSync(".runtime/" + cliName + ".hexmod")) as any).rules
+        .income,
+      3,
+    );
+    const cliPreview = JSON.parse(cli(["preview", cliPath]));
+    assert((await fetch(cliPreview.url)).ok);
   } finally {
     if (previewStarted) {
       const data = JSON.parse(

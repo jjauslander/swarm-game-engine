@@ -21,7 +21,11 @@ test("phone viewport fits controls and switches packages ten times", async ({
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto("/");
   for (let i = 0; i < 10; i++) {
-    await page.locator("#packages").selectOption(String(i % 2));
+    await page
+      .locator("#packages")
+      .selectOption({
+        label: i % 2 ? "Outpost Capture" : "Swarm Basic Prototype",
+      });
     await page
       .getByRole("button", { name: "Play locally", exact: true })
       .click();
