@@ -55,3 +55,7 @@ npm run benchmark
 ```
 
 See [build report](docs/Initial_Engine_Build_Report.md), [architecture](docs/Architecture.md), [package format](docs/Package_Format.md), [reference mapping](docs/Reference_Mapping.md) and [asset provenance](docs/Asset_Provenance.md). Original project access is not needed to install/build/run/test.
+
+## Planned rule separation
+
+The current runtime still contains Swarm-specific rules. The [Game-rule separation implementation brief](docs/Game_Rule_Separation_Implementation_Brief.md) defines the next step: move those rules into trusted game modules and prove the interface with Outpost Capture, a different game with fuel, deployment and base capture. The brief is ready for review; implementation has not yet been authorized.
